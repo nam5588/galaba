@@ -18,7 +18,7 @@ galaba/
 | `npm run install:all` | 루트·백·프론트 의존성 설치 (처음 한 번, 의존성 바뀔 때) |
 | `npm run dev` | 백엔드(4100)와 프론트(3000)를 같이 실행 |
 | `npm run dev:frontend` / `npm run dev:backend` | 한쪽만 실행 |
-| `npm run check` | 백엔드+프론트 타입체크 (push 전 필수) |
+| `npm run check` | 백엔드 타입체크+테스트, 프론트 타입체크 (push 전 필수) |
 | `npm --prefix frontend run lint` | 프론트 ESLint |
 | `npm run build` | 백엔드 tsc + 프론트 next build |
 
@@ -43,6 +43,8 @@ galaba/
 |---|---|---|---|
 | GET | `/api/health` | `{ status: "ok", timestamp }` | 구현됨 |
 | GET | `/api/notices?category=&limit=` | `{ source, fetchedAt, items: Notice[] }` (Notice: id, category, tag, tone, title, date, text, url, dept, pinned) | 구현됨 |
+| POST | `/api/fd1/plan` | body `{ visaType: "D-2"\|"D-4", entryDate, arcIssuedDate?, stayExpiryDate?, moveDate?, paidMonths?: "YYYY-MM"[], today? }` → `{ today, profile, tasks: Fd1Task[], insurance: Fd1Insurance, rulesVerified }` (Fd1Task: type, dueDate, openDate?, daysLeft, status, urgency) | 구현됨 |
+| GET | `/api/fd1/guides?lang=ko\|en\|uz` | `{ lang, guides: Record<Fd1TaskType, { title, summary, checklist[], links[] }>, disclaimer, sources }` | 구현됨 |
 
 ## 프론트엔드 메모
 - `frontend/AGENTS.md`: Next 16은 학습 데이터와 다를 수 있으니, Next API를 새로 쓸 때는 `frontend/node_modules/next/dist/docs/`를 먼저 확인한다.
@@ -53,6 +55,8 @@ galaba/
 - `next build`의 "multiple lockfiles / workspace root" 경고는 루트와 frontend에 lock 파일이 따로 있어서 생긴다. 빌드에는 영향이 없다.
 
 ## 백엔드 메모
+- FD1(체류·건강보험 일정, `docs/PRD-FD1.md`): 계산은 `src/fd1/plan.ts`(순수 함수), 규정 숫자는 `src/fd1/config.ts`에서만 바꾼다. 날짜는 한국 시간 기준 `"YYYY-MM-DD"` 문자열. 화면 문구는 서버가 보내지 않고, 안내·체크리스트 다국어 문구는 `src/fd1/guides.ts`에 있다.
+- 테스트: `npm --prefix backend test` (node:test + tsx, `src/**/*.test.ts`). `npm run check`에 포함된다.
 - ESM이라 상대 import에 `.js` 확장자를 붙인다.
 - 백엔드는 **TypeScript 7**(프론트는 5.9)이다. `baseUrl` 같은 옛 tsconfig 옵션은 제거되어 에러가 나니 `paths`를 쓴다.
 - CORS는 `CORS_ORIGIN` 한 곳만 허용한다. 프론트가 3000이 아닌 포트로 뜨면 브라우저에서 CORS 에러가 난다(`add-api-endpoint` 스킬의 "데이터가 안 보일 때").
