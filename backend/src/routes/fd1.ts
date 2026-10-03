@@ -4,6 +4,7 @@ import { FD1_LANGS, getFd1Guides, isFd1Lang } from "../fd1/guides.js";
 import { renderReminder } from "../fd1/messages.js";
 import { computeFd1Plan, parseProfile } from "../fd1/plan.js";
 import { remindersFor } from "../fd1/reminders.js";
+import { demoProfile } from "../tools/get_deadlines.js";
 
 export const fd1Router = Router();
 
@@ -55,4 +56,12 @@ fd1Router.post("/reminders", (req, res) => {
   const today = isIsoDate(req.body.today) ? req.body.today : todayInSeoul();
   const items = remindersFor(parsed.profile, today).map((r) => ({ ...r, ...renderReminder(r, lang) }));
   res.json({ today, lang, items });
+});
+
+/**
+ * GET /api/fd1/demo-profile
+ * 데모 사용자(data/demo-user.json)의 FD1 입력. 채팅(get_deadlines)과 같은 사람을 화면에도 보여주기 위함.
+ */
+fd1Router.get("/demo-profile", (_req, res) => {
+  res.json(demoProfile());
 });

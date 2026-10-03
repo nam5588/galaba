@@ -9,7 +9,6 @@ import {
   ChevronDown,
   ChevronRight,
   FileText,
-  Globe2,
   GraduationCap,
   Home,
   MessageCircle,
@@ -20,14 +19,18 @@ import {
   X,
 } from 'lucide-react'
 import { ChatPanel, type ChatPanelHandle } from '@/components/chat/ChatPanel'
+import { Fd1TopActions } from '@/components/fd1/Fd1Header'
+import { Fd1UpcomingRows } from '@/components/fd1/Fd1Upcoming'
+import { useFd1 } from '@/components/fd1/useFd1'
+import { routeOfTask } from '@/lib/fd1'
 import { useChat } from '@/components/chat/useChat'
 
 const navItems = [
   { label: '홈', icon: Home },
   { label: 'AI 상담하기', icon: MessageCircle },
-  { label: '비자 & 체류', icon: FileText },
+  { label: '비자 & 체류', icon: FileText, href: '/visa' },
   { label: '수강 & 학업', icon: GraduationCap },
-  { label: '건강보험', icon: ShieldCheck },
+  { label: '건강보험', icon: ShieldCheck, href: '/insurance' },
   { label: '생활 정보', icon: Home },
   { label: '커뮤니티', icon: MessageCircle },
   { label: '설정', icon: Settings },
@@ -61,6 +64,8 @@ function SectionHeading({ icon: Icon, title, action = '전체 보기' }: { icon:
 // 메인 = 왼쪽 사이드바(2번, 고정) + 가운데 LLM 채팅창(1번, 이 영역만 스크롤) + 오른쪽 시간표·일정(3번, 고정)
 export default function Page() {
   const chat = useChat()
+  const fd1 = useFd1()
+  const router = useRouter()
   const panelRef = useRef<ChatPanelHandle>(null)
   const [activeNav, setActiveNav] = useState('홈')
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
@@ -82,11 +87,15 @@ export default function Page() {
           <button className="mobile-close" onClick={() => setMobileNavOpen(false)} aria-label="메뉴 닫기"><X size={20} /></button>
         </div>
         <nav className="main-nav" aria-label="주요 메뉴">
-          {navItems.map(({ label, icon: Icon }) => (
+          {navItems.map(({ label, icon: Icon, href }) => (
             <button
               key={label}
               onClick={() => {
                 setMobileNavOpen(false)
+                if (href) {
+                  router.push(href)
+                  return
+                }
                 if (label === 'AI 상담하기' || label === '홈') {
                   setActiveNav('홈')
                   panelRef.current?.focus()
@@ -117,7 +126,7 @@ export default function Page() {
       <div className="content-area">
         <header className="topbar">
           <button className="mobile-menu" onClick={() => setMobileNavOpen(true)} aria-label="메뉴 열기"><MoreHorizontal size={24} /></button>
-          <div className="top-actions"><button><Globe2 size={19} />한국어<ChevronDown size={14} /></button><button className="icon-button notification"><Bell size={21} /><i /></button><div className="profile"><div className="avatar">무</div><div><strong>무하마드</strong><small>컴퓨터공학과 · 3학년</small></div><ChevronDown size={15} /></div></div>
+          <div className="top-actions"><Fd1TopActions fd1={fd1} /><div className="profile"><div className="avatar">무</div><div><strong>무하마드</strong><small>컴퓨터공학과 · 3학년</small></div><ChevronDown size={15} /></div></div>
         </header>
 
         <div className="dashboard-grid">
@@ -125,7 +134,7 @@ export default function Page() {
             <ChatPanel ref={panelRef} chat={chat} />
           </section>
 
-          <aside className="right-column"><section className="panel schedule-panel"><div className="section-heading"><div className="heading-title"><CalendarDays size={22} /><h2>시간표</h2></div><button className="week-button">이번 주 <ChevronDown size={15} /></button></div><div className="weekdays">{['월\n10.14', '화\n10.15', '수\n10.16', '목\n10.17', '금\n10.18'].map((day, i) => <button className={i === 2 ? 'selected-day' : ''} key={day}>{day.split('\n').map((line) => <span key={line}>{line}</span>)}</button>)}</div><div className="timeline">{schedule.map(([from, to, title, room, tone]) => <div className="timeline-row" key={title}><div className="time">{from}<br />{to}</div><div className={`timeline-dot ${tone}`} /><div className="class-card"><strong>{title}</strong><span>{room}</span></div></div>)}</div><button className="full-button">전체 시간표 보기 <ArrowRight size={17} /></button></section><section className="panel upcoming-panel"><SectionHeading icon={CalendarDays} title="다가오는 일정" /><div className="upcoming-list">{[['10.20 (월)', '건강보험료 납부 기한', 'D-4', 'red'], ['10.25 (토)', '국제학생 페스티벌', 'D-9', 'yellow'], ['11.03 (월)', '수강신청 시작', 'D-18', 'blue'], ['12.15 (월)', '성적 정정 마감', 'D-60', 'purple']].map(([date, title, badge, tone]) => <div className="upcoming-row" key={title}><span className="upcoming-date">{date}</span><i className={`upcoming-dot ${tone}`} /><strong>{title}</strong><b className={tone}>{badge}</b></div>)}</div></section></aside>
+          <aside className="right-column"><section className="panel schedule-panel"><div className="section-heading"><div className="heading-title"><CalendarDays size={22} /><h2>시간표</h2></div><button className="week-button">이번 주 <ChevronDown size={15} /></button></div><div className="weekdays">{['월\n10.14', '화\n10.15', '수\n10.16', '목\n10.17', '금\n10.18'].map((day, i) => <button className={i === 2 ? 'selected-day' : ''} key={day}>{day.split('\n').map((line) => <span key={line}>{line}</span>)}</button>)}</div><div className="timeline">{schedule.map(([from, to, title, room, tone]) => <div className="timeline-row" key={title}><div className="time">{from}<br />{to}</div><div className={`timeline-dot ${tone}`} /><div className="class-card"><strong>{title}</strong><span>{room}</span></div></div>)}</div><button className="full-button">전체 시간표 보기 <ArrowRight size={17} /></button></section><section className="panel upcoming-panel"><SectionHeading icon={CalendarDays} title="다가오는 일정" /><div className="upcoming-list"><Fd1UpcomingRows fd1={fd1} onOpenTask={(type) => router.push(routeOfTask(type))} />{[['10.25 (토)', '국제학생 페스티벌', 'D-9', 'yellow'], ['11.03 (월)', '수강신청 시작', 'D-18', 'blue'], ['12.15 (월)', '성적 정정 마감', 'D-60', 'purple']].map(([date, title, badge, tone]) => <div className="upcoming-row" key={title}><span className="upcoming-date">{date}</span><i className={`upcoming-dot ${tone}`} /><strong>{title}</strong><b className={tone}>{badge}</b></div>)}</div></section></aside>
         </div>
       </div>
     </main>

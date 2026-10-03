@@ -1,0 +1,92 @@
+/* FD1 체류·건강보험 패널. 채팅 패널과 같은 카드 모양, 가운데 영역 안에서만 스크롤한다. */
+.panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid #e3ebf4;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 14px #1c4c8510;
+  padding: 20px 22px;
+}
+
+.header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.header h2 { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 21px; letter-spacing: -0.6px; }
+.header h2 svg { color: #247ff0; }
+
+.ghostButton { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid #d5e4f7; border-radius: 9px; color: #1d6fd6; font-size: 13px; font-weight: 700; background: #f6faff; }
+.primaryButton { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 9px; color: #fff; background: #3189ed; font-size: 13px; font-weight: 700; }
+.linkButton { color: #1d6fd6; font-size: 12px; font-weight: 700; text-decoration: underline; }
+
+.note { margin: 0 0 14px; padding: 10px 12px; border-radius: 9px; background: #f2f7ff; color: #3d5a82; font-size: 13px; line-height: 1.5; }
+.warn { margin: 0 0 14px; padding: 10px 12px; border-radius: 9px; background: #fff4f4; border: 1px solid #f6d9dc; color: #b4232c; font-size: 13px; font-weight: 700; }
+
+/* 내 정보 입력 (온보딩) */
+.form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; margin-bottom: 18px; padding: 16px; border: 1px solid #dbe8f8; border-radius: 12px; background: #f9fbff; }
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 700; color: #3d5a82; }
+.field input, .field select { height: 38px; padding: 0 10px; border: 1px solid #d3e0f1; border-radius: 8px; background: #fff; color: var(--ink); font: inherit; font-size: 14px; font-weight: 400; }
+.check { display: flex; align-items: center; gap: 8px; align-self: end; height: 38px; font-size: 13px; font-weight: 700; color: #3d5a82; }
+.formActions { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; }
+.formError { color: #c0262f; font-size: 12px; font-weight: 700; }
+
+.summary { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 16px; color: #526988; font-size: 13px; }
+.summary b { color: var(--ink); }
+
+/* 작업 카드 */
+.tasks { display: flex; flex-direction: column; gap: 12px; }
+.task { border: 1px solid; border-radius: 11px; padding: 14px 16px; }
+.task.red { border-color: #f6d9dc; background: #fff9fa; }
+.task.yellow { border-color: #f7ecd0; background: #fffbf2; }
+.task.blue { border-color: #dbe9fb; background: #f8fbff; }
+.taskTop { display: flex; align-items: center; gap: 10px; }
+.taskTop strong { font-size: 16px; letter-spacing: -0.4px; }
+.badge { margin-left: auto; padding: 5px 9px; border-radius: 8px; background: #fff; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.red .badge { color: #e0353f; }
+.yellow .badge { color: #c98a00; }
+.blue .badge { color: #217fe1; }
+.taskMeta { margin: 6px 0 0; color: #607593; font-size: 12px; }
+.taskSummary { margin: 8px 0 0; color: #334d72; font-size: 13px; line-height: 1.55; }
+.checklist { margin: 10px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; }
+.checklist li { display: flex; gap: 7px; color: #3d5372; font-size: 12.5px; line-height: 1.45; }
+.checklist li::before { content: '✓'; color: #2f86ee; font-weight: 800; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.links a { display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 8px; background: #fff; border: 1px solid #d8e5f6; color: #1d6fd6; font-size: 12px; font-weight: 700; text-decoration: none; }
+
+/* 건강보험 */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+.stat { padding: 12px 14px; border: 1px solid #e3ebf4; border-radius: 10px; background: #f9fbff; }
+.stat span { display: block; color: #6c809d; font-size: 12px; }
+.stat b { display: block; margin-top: 4px; font-size: 17px; letter-spacing: -0.4px; }
+.stat.alert { border-color: #f6d9dc; background: #fff8f9; }
+.stat.alert b { color: #e0353f; }
+.months { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.month { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid #e3ebf4; border-radius: 10px; font-size: 13px; }
+.month.isPaid { background: #f5fcf9; border-color: #d4eee3; }
+.month.isOverdue { background: #fff8f9; border-color: #f2cdd1; }
+.monthTop { display: flex; justify-content: space-between; font-weight: 800; }
+.month small { color: #6c809d; }
+.payButton { padding: 6px 8px; border-radius: 7px; border: 1px solid #cfe1f8; background: #fff; color: #1d6fd6; font-size: 12px; font-weight: 800; }
+.month.isPaid .payButton { border-color: #bfe5d4; color: #149768; }
+
+.footer { margin-top: 18px; padding-top: 12px; border-top: 1px solid #edf2f8; color: #74869f; font-size: 11.5px; line-height: 1.6; }
+.footer a { color: #5b7395; }
+
+/* 알림 벨 */
+.bellWrap { position: relative; }
+.bellDot { position: absolute; top: 1px; right: 0; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; line-height: 16px; text-align: center; }
+.bellMenu { position: absolute; z-index: 20; top: calc(100% + 10px); right: -8px; width: min(360px, calc(100vw - 32px)); max-height: 420px; overflow-y: auto; border: 1px solid #dbe6f4; border-radius: 12px; background: #fff; box-shadow: 0 12px 32px #173b6926; white-space: normal; }
+.bellHead { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid #edf2f8; font-size: 14px; font-weight: 800; }
+/* .top-actions button { display:flex } 규칙을 덮어써서 제목·본문을 위아래로 */
+.bellItem { display: flex !important; flex-direction: column; align-items: stretch !important; gap: 0 !important; width: 100%; padding: 11px 14px; border-bottom: 1px solid #f1f5fa; text-align: left; }
+.bellItem:hover { background: #f6faff; }
+.bellItem strong { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.bellItem p { margin: 4px 0 0; color: #536a8a; font-size: 12.5px; line-height: 1.5; font-weight: 400; }
+.unreadDot { width: 7px; height: 7px; border-radius: 50%; background: #ef4444; }
+.bellEmpty { padding: 18px 14px; color: #74869f; font-size: 13px; }
+
+.langSelect { height: 32px; padding: 0 8px; border: 1px solid #d7e5f8; border-radius: 8px; background: #fff; color: var(--ink); font: inherit; font-size: 13px; font-weight: 700; }
+
+@media (max-width: 850px) {
+  .form, .checklist { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

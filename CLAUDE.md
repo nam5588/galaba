@@ -47,6 +47,7 @@ galaba/
 | POST | `/api/fd1/plan` | body `{ visaType: "D-2"\|"D-4", entryDate, arcIssuedDate?, stayExpiryDate?, moveDate?, paidMonths?: "YYYY-MM"[], today? }` → `{ today, profile, tasks: Fd1Task[], insurance: Fd1Insurance, rulesVerified }` (Fd1Task: type, dueDate, openDate?, daysLeft, status, urgency) | 구현됨 |
 | GET | `/api/fd1/guides?lang=ko\|en\|uz` | `{ lang, guides: Record<Fd1TaskType, { title, summary, checklist[], links[] }>, disclaimer, sources }` | 구현됨 |
 | POST | `/api/fd1/reminders` | body: `/api/fd1/plan`과 같은 profile + `lang?` → `{ today, lang, items: { key, taskType, milestone, dueDate, daysLeft, month?, title, body }[] }` (사이트 알림 벨) | 구현됨 |
+| GET | `/api/fd1/demo-profile` | `Fd1Profile` (data/demo-user.json 기준, 채팅 get_deadlines와 같은 사용자) | 구현됨 |
 | POST | `/api/chat` `{ messages: [{role, content}] }` | `{ answer, toolsUsed: string[], sources: [{title, url?, kind, text?}], steps: [{tool, label}], actions: [{type:"calendar", title, date, url}], mode: "claude"\|"offline" }` (PRD 5장 + 화면용 필드) | 구현됨 |
 
 ## 프론트엔드 메모
@@ -56,6 +57,8 @@ galaba/
 - **이미지 2개 필요**: `frontend/public/images/logo.png`(사이드바 로고), `frontend/public/images/hero-bg.png`(상단 배너 배경). v0 서버 링크가 깨져서 파일을 따로 넣어야 한다. 없으면 로고 자리에 대체 텍스트가 보인다.
 - v0에서 새 화면을 가져올 때: `v0-import` 스킬.
 - `next build`의 "multiple lockfiles / workspace root" 경고는 루트와 frontend에 lock 파일이 따로 있어서 생긴다. 빌드에는 영향이 없다.
+
+- FD1(체류·건강보험): `/visa`, `/insurance` 화면은 `components/fd1/`, 데이터·문구(ko/en/uz)는 `lib/fd1.ts`. 상단 언어 선택·알림 벨(`Fd1TopActions`)은 홈과 `AppShell`에 들어 있다. DB 연결 전까지 내 정보·납부 체크·읽은 알림은 localStorage(`fd1.*`)에 저장하고, 없으면 데모 사용자(`/api/fd1/demo-profile`)를 보여준다. 언어 선택은 아직 FD1 부분에만 적용된다.
 
 ## 백엔드 메모
 - FD1(체류·건강보험 일정, `docs/PRD-FD1.md`): 계산은 `src/fd1/plan.ts`(순수 함수), 규정 숫자는 `src/fd1/config.ts`에서만 바꾼다. 날짜는 한국 시간 기준 `"YYYY-MM-DD"` 문자열. 화면 문구는 서버가 보내지 않고, 안내·체크리스트 다국어 문구는 `src/fd1/guides.ts`에 있다.

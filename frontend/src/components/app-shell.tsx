@@ -3,12 +3,13 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { FormEvent, ReactNode, useState } from 'react'
+import { Fd1TopActions } from '@/components/fd1/Fd1Header'
+import { useFd1 } from '@/components/fd1/useFd1'
 import {
   Bell,
   CalendarDays,
   ChevronDown,
   FileText,
-  Globe2,
   GraduationCap,
   HeartPulse,
   Home,
@@ -26,9 +27,9 @@ const navItems = [
   { label: '학교 공지사항', icon: Bell, href: '/notices' },
   { label: '시간표', icon: CalendarDays, href: '/schedule' },
   { label: 'AI 상담하기', icon: MessageCircle },
-  { label: '비자 & 체류', icon: FileText },
+  { label: '비자 & 체류', icon: FileText, href: '/visa' },
   { label: '수강 & 학업', icon: GraduationCap },
-  { label: '건강보험', icon: ShieldCheck },
+  { label: '건강보험', icon: ShieldCheck, href: '/insurance' },
   { label: '생활 정보', icon: HeartPulse },
   { label: '설정', icon: Settings },
 ]
@@ -38,6 +39,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [siteSearch, setSiteSearch] = useState('')
+  const fd1 = useFd1()
 
   const submitSearch = (event: FormEvent) => {
     event.preventDefault()
@@ -82,7 +84,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Search size={20} />
             <input value={siteSearch} onChange={(event) => setSiteSearch(event.target.value)} aria-label="통합 검색" placeholder="학교 공지, 비자, 수강신청 등 궁금한 내용을 검색해보세요" />
           </form>
-          <div className="top-actions"><button type="button"><Globe2 size={19} />한국어<ChevronDown size={14} /></button><button type="button" className="icon-button notification" aria-label="알림"><Bell size={21} /><i /></button><div className="profile"><div className="avatar">김</div><div><strong>문함마드</strong><small>컴퓨터공학과 · 3학년</small></div><ChevronDown size={15} /></div></div>
+          <div className="top-actions"><Fd1TopActions fd1={fd1} /><div className="profile"><div className="avatar">김</div><div><strong>문함마드</strong><small>컴퓨터공학과 · 3학년</small></div><ChevronDown size={15} /></div></div>
         </header>
         {children}
       </div>
