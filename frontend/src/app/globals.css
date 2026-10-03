@@ -49,3 +49,5 @@ button { border:0; background:none; color:inherit; cursor:pointer; }
   .dash-fixed .right-column { overflow:visible; }
 }
 .dash-fixed .top-actions { margin-left:auto; }
+.upcoming-row { color:inherit; text-decoration:none; } .upcoming-row:hover strong { color:#1976e9; } .upcoming-empty { margin:6px 2px; color:#7a8aa6; font-size:12.5px; }
+.brand-link .brand-logo { display:block; } .chat-heading a { display:grid; place-items:center; padding:2px; border-radius:6px; color:inherit; } .chat-heading a:hover { background:#f0f6ff; } span.week-button { cursor:default; }
