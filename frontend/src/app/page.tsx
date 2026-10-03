@@ -9,6 +9,7 @@ import { useChat } from '@/components/chat/useChat'
 import { Fd1UpcomingRows } from '@/components/fd1/Fd1Upcoming'
 import { useFd1 } from '@/components/fd1/useFd1'
 import { WeekSchedule } from '@/components/home/WeekSchedule'
+import { IntroSplash } from '@/components/intro/IntroSplash'
 import { routeOfTask } from '@/lib/fd1'
 
 // 메인 = 왼쪽 메뉴(공용 AppShell, 고정) + 가운데 AI 채팅(이 영역만 스크롤) + 오른쪽 시간표·다가오는 일정(고정)
@@ -32,6 +33,8 @@ export default function Page() {
       }}
       onAiNav={() => panelRef.current?.focus()}
     >
+      {/* 첫 화면: 도장을 찍으면 메인으로. 끝나면 바로 질문할 수 있게 채팅 입력창에 커서 */}
+      <IntroSplash onDone={() => panelRef.current?.focus()} />
       <Suspense fallback={null}>
         <AutoAsk onAsk={ask} />
       </Suspense>
