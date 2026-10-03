@@ -45,6 +45,7 @@ galaba/
 | GET | `/api/notices?category=&limit=` | `{ source, fetchedAt, items: Notice[] }` (Notice: id, category, tag, tone, title, date, text, url, dept, pinned) | 구현됨 |
 | POST | `/api/fd1/plan` | body `{ visaType: "D-2"\|"D-4", entryDate, arcIssuedDate?, stayExpiryDate?, moveDate?, paidMonths?: "YYYY-MM"[], today? }` → `{ today, profile, tasks: Fd1Task[], insurance: Fd1Insurance, rulesVerified }` (Fd1Task: type, dueDate, openDate?, daysLeft, status, urgency) | 구현됨 |
 | GET | `/api/fd1/guides?lang=ko\|en\|uz` | `{ lang, guides: Record<Fd1TaskType, { title, summary, checklist[], links[] }>, disclaimer, sources }` | 구현됨 |
+| POST | `/api/fd1/reminders` | body: `/api/fd1/plan`과 같은 profile + `lang?` → `{ today, lang, items: { key, taskType, milestone, dueDate, daysLeft, month?, title, body }[] }` (사이트 알림 벨) | 구현됨 |
 | POST | `/api/chat` `{ messages: [{role, content}] }` | `{ answer, toolsUsed: string[], sources: [{title, url?, kind, text?}], steps: [{tool, label}], actions: [{type:"calendar", title, date, url}], mode: "claude"\|"offline" }` (PRD 5장 + 화면용 필드) | 구현됨 |
 
 ## 프론트엔드 메모

@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { isIsoDate, todayInSeoul } from "../fd1/dates.js";
 import { FD1_LANGS, getFd1Guides, isFd1Lang } from "../fd1/guides.js";
+import { renderReminder } from "../fd1/messages.js";
 import { computeFd1Plan, parseProfile } from "../fd1/plan.js";
+import { remindersFor } from "../fd1/reminders.js";
 
 export const fd1Router = Router();
 
@@ -32,4 +34,25 @@ fd1Router.get("/guides", (req, res) => {
     return;
   }
   res.json(getFd1Guides(lang));
+});
+
+/**
+ * POST /api/fd1/reminders
+ * body: /plan과 같은 profile + { lang?: "ko"|"en"|"uz", today? }
+ * 오늘 보여줄 알림 (사이트 알림 벨). 읽음 처리는 DB 연결 전까지 프론트가 `key`로 보관한다.
+ */
+fd1Router.post("/reminders", (req, res) => {
+  const parsed = parseProfile(req.body);
+  if (!parsed.ok) {
+    res.status(400).json({ error: parsed.error });
+    return;
+  }
+  const lang = req.body.lang ?? "ko";
+  if (!isFd1Lang(lang)) {
+    res.status(400).json({ error: `lang은 ${FD1_LANGS.join(", ")} 중 하나여야 합니다.` });
+    return;
+  }
+  const today = isIsoDate(req.body.today) ? req.body.today : todayInSeoul();
+  const items = remindersFor(parsed.profile, today).map((r) => ({ ...r, ...renderReminder(r, lang) }));
+  res.json({ today, lang, items });
 });

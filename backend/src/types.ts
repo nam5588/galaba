@@ -115,3 +115,21 @@ export interface Fd1GuidesResponse {
   /** 규정 출처 (docs/PRD-FD1.md) */
   sources: { label: string; url: string }[];
 }
+
+export interface Fd1ReminderItem {
+  /** 중복·읽음 처리 키 */
+  key: string;
+  taskType: Fd1TaskType;
+  milestone: string;
+  dueDate: string;
+  daysLeft: number;
+  month?: string;
+  title: string;
+  body: string;
+}
+
+export interface Fd1RemindersResponse {
+  today: string;
+  lang: Fd1Lang;
+  items: Fd1ReminderItem[];
+}
