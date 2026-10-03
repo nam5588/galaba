@@ -1,2 +1,10 @@
 node_modules
 .DS_Store
+
+# env files (only .env.example is committed)
+.env
+.env.*
+!.env.example
+
+# personal Claude Code settings
+.claude/settings.local.json
