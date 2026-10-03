@@ -4,18 +4,18 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRef, useState } from 'react'
-import { ArrowLeft, CheckCircle2, MapPin, X } from 'lucide-react'
+import { ArrowLeft, Briefcase, CheckCircle2, MapPin, X } from 'lucide-react'
 import { jobs, getWorkplace, formatShifts, formatTopik, type Job } from '../jobsData'
 import { employerPosts } from '../jobDetails'
 import { useStudentProfile } from '../ProfileContext'
-import { matchJob, matchLabels } from '../matching'
+import { matchJob } from '../matching'
 import { EmploymentNotice, MatchChecks, ReviewSummary } from '../JobInfo'
 import styles from '../jobs.module.css'
 
 export default function JobDetailPage() {
   const params = useParams<{ id: string }>()
   const job = jobs.find((item) => String(item.id) === params.id)
-  return job ? <JobDetail key={job.id} job={job} /> : <div className={styles.page}><section className={`panel ${styles.empty}`}><h1>공고를 찾을 수 없습니다.</h1><Link className={styles.detailLink} href="/jobs">알바 목록으로 돌아가기</Link></section></div>
+  return job ? <JobDetail key={job.id} job={job} /> : <div className={`feature-page ${styles.page}`}><section className={`panel ${styles.empty}`}><h1>공고를 찾을 수 없습니다.</h1><Link className={styles.detailLink} href="/jobs">알바 목록으로 돌아가기</Link></section></div>
 }
 function JobDetail({ job }: { job: Job }) {
   const { profile } = useStudentProfile()
@@ -27,9 +27,9 @@ function JobDetail({ job }: { job: Job }) {
   const post = employerPosts[job.id]
   const mapQuery = post ? new URLSearchParams({ bbox: `${post.longitude - 0.007},${post.latitude - 0.004},${post.longitude + 0.007},${post.latitude + 0.004}`, layer: 'mapnik', marker: `${post.latitude},${post.longitude}` }).toString() : ''
   function openGuidance() { setAcknowledged(false); dialogRef.current?.showModal() }
-  return <div className={styles.page}>
+  return <div className={`feature-page ${styles.page}`}>
     <Link className={styles.backLink} href="/jobs"><ArrowLeft size={16} />알바 목록으로</Link>
-    <section className={styles.hero}><div><span className={styles.eyebrow}>{job.category} · 데모용 가상 데이터</span><h1>{workplace.name}</h1><p>{job.title}</p></div><div className={styles.heroNote}><strong>시간·언어 {match.count}/2 일치</strong><span>{matchLabels[match.status]}</span></div></section>
+    <div className="page-heading"><div><span className="eyebrow">{job.category} · 데모용 가상 데이터</span><h1>{workplace.name}</h1><p>{job.title}</p></div><div className="page-heading-icon"><Briefcase size={30} /></div></div>
     <section className={`panel ${styles.detailSection} ${styles.topMap}`} aria-labelledby="map-title">
       <div className={styles.sectionTop}><h2 id="map-title"><MapPin size={20} />국민대학교 근처 위치</h2><span className={styles.category}>지도 시연</span></div>
       <p>{workplace.location} · 도보 {job.walkMinutes}분(가상 데이터)</p>

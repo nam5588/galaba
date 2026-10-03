@@ -23,16 +23,15 @@ export default function JobsPage() {
     (!onlyMatched || match.status === 'matched') &&
     `${getWorkplace(job).name} ${job.title} ${job.category}`.toLocaleLowerCase('ko-KR').includes(query.trim().toLocaleLowerCase('ko-KR')))
   function resetFilters() { setQuery(''); setCategory('전체'); setOnlyMatched(false) }
-  return <div className={styles.page}>
-    <div className={styles.breadcrumb}><Link href="/">홈</Link><span>/</span><span>알바 찾기</span></div>
-    <section className={styles.hero}><div><span className={styles.eyebrow}><Briefcase size={16} /> DOJANG JOB</span><h1>내 시간에 맞는 알바 찾기</h1><p>국민대 주변 공고의 시간·언어 조건과 후기를 함께 확인해요.</p></div><div className={styles.heroNote}><strong>조건 일치와 취업 허가는 달라요</strong><span>모든 공고의 취업 관련 추가 확인 사항을 살펴보세요.</span></div></section>
+  return <div className={`feature-page ${styles.page}`}>
+    <div className="page-heading"><div><span className="eyebrow">유학생 생활 정보</span><h1>알바 찾기</h1><p>국민대 주변 공고의 시간·언어 조건과 후기를 함께 확인하세요.</p></div><div className="page-heading-icon"><Briefcase size={30} /></div></div>
     <p className={styles.demoNote}>모든 공고·사업장·후기: 데모용 가상 데이터 · 도보 시간은 지도 계산값이 아닌 예시입니다.</p>
     <ProfileEditor />
     <div className={styles.columns}>
       <section className={styles.results} aria-label="알바 목록">
-        <div className={`panel ${styles.filters}`}>
-          <label className={styles.search}><Search size={20} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="공고나 사업장 이름으로 검색" aria-label="알바 공고 검색" /></label>
-          <div className={styles.filterRow}><div className={styles.chips} aria-label="업종 필터">{categories.map((item) => <button key={item} className={category === item ? styles.selected : ''} aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div><label className={styles.checkbox}><input type="checkbox" checked={onlyMatched} onChange={(event) => setOnlyMatched(event.target.checked)} />기본 조건 일치만</label></div>
+        <div className={`feature-panel ${styles.filters}`}>
+          <label className="feature-search"><Search size={19} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="공고 제목이나 사업장 이름을 검색하세요" aria-label="알바 공고 검색" /></label>
+          <div className={styles.filterRow}><div className={`filter-chips ${styles.filterChips}`} aria-label="업종 필터">{categories.map((item) => <button key={item} className={category === item ? 'active' : ''} aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div><label className={styles.checkbox}><input type="checkbox" checked={onlyMatched} onChange={(event) => setOnlyMatched(event.target.checked)} />기본 조건 일치만</label></div>
         </div>
         <div className={styles.resultsHeading}><h2 aria-live="polite">추천 공고 <span>{filtered.length}</span></h2><span className={styles.sort}>일치 수 ↓ · 도보 시간 ↑ · 정보 부족 마지막</span></div>
         <div className={styles.cards}>{filtered.map(({ job, match }) => <JobCard key={job.id} job={job} match={match} />)}</div>
