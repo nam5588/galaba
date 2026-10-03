@@ -255,7 +255,9 @@ export async function chat(history: ChatTurn[]): Promise<ChatResponse> {
           .flatMap((b) => (b.type === "text" ? [b.text] : []))
           .join("")
           .trim();
-        const answer = final.length < 120 && earlierText ? earlierText : final; // 짧은 마무리 인사보다 본문을 보여준다
+        let answer = final.length < 120 && earlierText ? earlierText : final; // 짧은 마무리 인사보다 본문을 보여준다
+        // 캘린더를 실제로 만들지 않았는데 "만들어 뒀어요"라고 쓰는 경우가 있어 지운다
+        if (!state.actions.length) answer = answer.replace(/[ \t]*캘린더 버튼을 만들어 뒀어요[.!]?/g, "").trim();
         return {
           answer: answer || "답변을 만들지 못했어요. 다시 물어봐 주세요.",
           toolsUsed: state.toolsUsed,
