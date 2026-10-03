@@ -1,0 +1,145 @@
+/* 메인 가운데(1번 영역) 채팅 패널. 대시보드 카드(.panel)와 같은 테두리·그림자를 쓴다. */
+.panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e3ebf4;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 14px #1c4c8510;
+  overflow: hidden;
+}
+
+.panelBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #edf2f8;
+  color: #31507c;
+  font-size: 13px;
+  font-weight: 700;
+}
+.panelBar > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.panelBar svg {
+  color: #2e86ee;
+}
+
+.scroller {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.thread {
+  padding: 18px 18px 8px;
+}
+
+/* 빈 화면: "귀찮은걸 물어보세요" */
+.empty {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 24px;
+  text-align: center;
+}
+.emptyTitle {
+  margin: 0;
+  color: #0e2d61;
+  font-size: clamp(28px, 3.2vw, 42px);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  word-break: keep-all;
+}
+.emptyLead {
+  margin: 0;
+  max-width: 520px;
+  color: #657795;
+  font-size: 14px;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 640px;
+  margin-top: 10px;
+}
+.suggestion {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border: 1px solid #d7e5f8;
+  border-radius: 999px;
+  background: #f7faff;
+  color: #31507c;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.suggestion:hover {
+  background: #eef5ff;
+  border-color: #b9d4f7;
+}
+.suggestion:focus-visible {
+  outline: 2px solid #318bf0;
+  outline-offset: 2px;
+}
+.suggestionHero {
+  background: #318bf0;
+  border-color: #318bf0;
+  color: #fff;
+}
+.suggestionHero:hover {
+  background: #1f78dd;
+  border-color: #1f78dd;
+}
+
+/* 아래 질문 카드: 기존 .ask-card 모양을 그대로 쓰고 패널 안에 붙인다 */
+.composer {
+  flex: none;
+  margin: 0 14px 14px;
+}
+.inputRow {
+  height: auto !important;
+  min-height: 52px;
+}
+.inputRow textarea {
+  min-width: 0;
+  flex: 1;
+  resize: none;
+  border: 0;
+  outline: 0;
+  padding: 15px 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  max-height: 120px;
+}
+.inputRow textarea::placeholder {
+  color: #9cafc7;
+}
+
+@media (max-width: 560px) {
+  .composer {
+    margin: 0 8px 8px;
+  }
+  .inputRow textarea {
+    font-size: 16px; /* iPhone 자동 확대 방지 */
+  }
+}

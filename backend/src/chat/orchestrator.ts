@@ -31,7 +31,7 @@ export interface ChatResponse {
   mode: "claude" | "offline";
 }
 
-const MODEL = process.env.CHAT_MODEL || "claude-sonnet-5";
+const MODEL = process.env.CHAT_MODEL || "claude-opus-5";
 const EFFORT = process.env.CHAT_EFFORT as "low" | "medium" | "high" | undefined;
 const MAX_TOOL_CALLS = 5;
 
@@ -45,6 +45,8 @@ const client =
         maxRetries: 1,
       })
     : null;
+
+console.log(`[chat] LLM: ${client ? `${MODEL} @ ${process.env.LLM_BASE_URL || "api.anthropic.com"}` : "없음 (오프라인 모드)"}`);
 
 const TOOL_PARAMS: Anthropic.Tool[] = TOOLS.map((t) => ({
   name: t.name,

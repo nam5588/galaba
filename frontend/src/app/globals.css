@@ -18,3 +18,22 @@ button { border:0; background:none; color:inherit; cursor:pointer; }
 @media (max-width:850px) { .sidebar { position:fixed; z-index:10; inset:0 auto 0 0; transform:translateX(-100%); transition:transform .2s ease; box-shadow:8px 0 30px #173b6926; }.sidebar.mobile-open { transform:translateX(0); }.mobile-close,.mobile-menu { display:grid; place-items:center; }.mobile-close { position:absolute; right:15px; top:19px; }.mobile-menu { flex:0 0 auto; }.topbar { padding:0 15px; gap:10px; }.top-actions > button:first-child,.profile { display:none; }.dashboard-grid { grid-template-columns:1fr; padding:12px; }.right-column { display:grid; grid-template-columns:1fr 1fr; }.hero-card { min-height:310px; }.hero-calendar { right:20px; bottom:15px; }.notice-grid { grid-template-columns:1fr; }.notice-card { min-height:auto; }.status-grid { grid-template-columns:repeat(2,1fr); } }
 @media (max-width:560px) { .hero-card { padding:22px 19px; min-height:330px; }.hero-card h1 { font-size:26px; }.hero-card p { font-size:13px; }.hero-actions { gap:8px; }.primary-button,.secondary-button { padding:0 11px; font-size:12px; }.hero-calendar { left:19px; right:19px; font-size:11px; }.right-column { display:flex; }.status-grid { grid-template-columns:1fr; }.ask-heading span { display:none; }.ask-input { gap:7px; }.ask-input button:not(.send-button) { display:none; }.send-button { flex:0 0 52px; }.section-heading h2 { font-size:17px; }.updated { display:none; } }
 @media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto!important; transition:none!important; } }
+
+/* ===== 메인 고정 레이아웃: 사이드바(2번)·오른쪽(3번) 고정, 가운데 채팅(1번)만 스크롤 ===== */
+.dash-fixed { height:100vh; height:100dvh; overflow:hidden; }
+.dash-fixed .sidebar { height:100%; overflow-y:auto; }
+.dash-fixed .content-area { display:flex; flex-direction:column; height:100%; min-height:0; }
+.dash-fixed .topbar { flex:none; }
+.dash-fixed .dashboard-grid { flex:1; min-height:0; width:100%; align-items:stretch; }
+.dash-fixed .main-column { min-height:0; }
+.dash-fixed .right-column { min-height:0; overflow-y:auto; }
+.chat-heading button { display:grid; place-items:center; padding:2px; border-radius:6px; color:inherit; }
+.chat-heading button:hover { background:#f0f6ff; }
+.chat-item:disabled { opacity:.55; cursor:default; }
+@media (max-width:850px) {
+  .dash-fixed { height:auto; overflow:visible; }
+  .dash-fixed .content-area { height:auto; }
+  .dash-fixed .main-column { height:calc(100dvh - 96px); }
+  .dash-fixed .right-column { overflow:visible; }
+}
+.dash-fixed .top-actions { margin-left:auto; }

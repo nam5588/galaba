@@ -2,14 +2,13 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "UniMate | 유학생 생활 파트너",
+  title: "Dojang | 국민대 유학생 행정비서",
   description:
-    "유학생의 학교 생활, 비자, 수강신청과 일정을 한곳에서 관리하는 UniMate 대시보드",
+    "체류·학교·알바 무엇을 물어도 AI가 학칙과 공지를 근거로 답하는 국민대 유학생 행정비서 Dojang",
   icons: {
     icon: [
       { url: "/icon-light-32x32.png", media: "(prefers-color-scheme: light)" },
       { url: "/icon-dark-32x32.png", media: "(prefers-color-scheme: dark)" },
-      { url: "/icon.svg", type: "image/svg+xml" },
     ],
     apple: "/apple-icon.png",
   },
