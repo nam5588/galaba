@@ -63,12 +63,16 @@ export interface ChatResponse {
   mode: ChatMode;
 }
 
+export type ChatLang = "ko" | "en" | "uz" | "ru";
+
 export interface ChatRequest {
   messages: ChatTurn[];
+  /** 화면 언어. en/uz/ru면 질문이 한국어여도 그 언어로 답한다. ko·생략이면 질문한 언어로 */
+  lang?: ChatLang;
 }
 
-export async function sendChat(messages: ChatTurn[], signal?: AbortSignal): Promise<ChatResponse> {
-  const body: ChatRequest = { messages };
+export async function sendChat(messages: ChatTurn[], signal?: AbortSignal, lang?: ChatLang): Promise<ChatResponse> {
+  const body: ChatRequest = { messages, ...(lang && { lang }) };
   const raw = await api<unknown>("/api/chat", {
     method: "POST",
     body: JSON.stringify(body),

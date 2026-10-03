@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, CalendarDays } from 'lucide-react'
 import { api } from '@/lib/api'
+import { tr, useLang } from '@/lib/i18n'
+import { CHAT_T } from '@/lib/i18n/chat'
 import type { ScheduleResponse } from '@/lib/types'
 
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
+const WEEKDAYS = ['wd0', 'wd1', 'wd2', 'wd3', 'wd4', 'wd5', 'wd6'] as const
 
 /** 한국 시간 오늘 (YYYY-MM-DD) */
 function todayKST() {
@@ -18,6 +20,8 @@ export function WeekSchedule() {
   const [data, setData] = useState<ScheduleResponse | null>(null)
   const [selected, setSelected] = useState<string | null>(null)
   const [error, setError] = useState(false)
+  const lang = useLang()
+  const t = (key: keyof typeof CHAT_T) => tr(CHAT_T, key, lang)
 
   useEffect(() => {
     const today = todayKST()
@@ -40,22 +44,22 @@ export function WeekSchedule() {
   return (
     <section className="panel schedule-panel">
       <div className="section-heading">
-        <div className="heading-title"><CalendarDays size={22} /><h2>시간표</h2></div>
-        <span className="week-button">{data && data.days[0]?.date !== undefined && data.days.every((d) => d.date !== today) ? '다음 주' : '이번 주'}</span>
+        <div className="heading-title"><CalendarDays size={22} /><h2>{t('timetable')}</h2></div>
+        <span className="week-button">{data && data.days[0]?.date !== undefined && data.days.every((d) => d.date !== today) ? t('nextWeek') : t('thisWeek')}</span>
       </div>
-      {error && <p className="upcoming-empty">시간표를 불러오지 못했어요.</p>}
+      {error && <p className="upcoming-empty">{t('scheduleFail')}</p>}
       {data && (
         <>
           <div className="weekdays">
             {data.days.map((d) => (
               <button key={d.date} className={d.date === selected ? 'selected-day' : ''} onClick={() => setSelected(d.date)}>
-                <span>{WEEKDAYS[new Date(`${d.date}T00:00:00Z`).getUTCDay()]}</span>
+                <span>{t(WEEKDAYS[new Date(`${d.date}T00:00:00Z`).getUTCDay()])}</span>
                 <span>{d.date.slice(5, 7)}.{d.date.slice(8, 10)}</span>
               </button>
             ))}
           </div>
           <div className="timeline">
-            {day && day.classes.length === 0 && <p className="upcoming-empty">수업 없음</p>}
+            {day && day.classes.length === 0 && <p className="upcoming-empty">{t('noClasses')}</p>}
             {day?.classes.map((c) => (
               <div className="timeline-row" key={c.id}>
                 <div className="time">{c.startTime}<br />{c.endTime}</div>
@@ -66,8 +70,8 @@ export function WeekSchedule() {
           </div>
         </>
       )}
-      {!data && !error && <p className="upcoming-empty">불러오는 중…</p>}
-      <Link href="/schedule" className="full-button">전체 시간표 보기 <ArrowRight size={17} /></Link>
+      {!data && !error && <p className="upcoming-empty">{t('loading')}</p>}
+      <Link href="/schedule" className="full-button">{t('fullTimetable')} <ArrowRight size={17} /></Link>
     </section>
   )
 }

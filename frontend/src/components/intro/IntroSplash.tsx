@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import { tr, useLang } from '@/lib/i18n'
+import { SHELL } from '@/lib/i18n/shell'
 import styles from './intro.module.css'
 
 // 첫 화면: 1번 "시작할까요?" 문구만 → 클릭(또는 Enter·Space) → 2번 도장이 쾅 찍힘 → 메인으로 넘어간다.
@@ -23,6 +25,7 @@ const FADE_MS = 550 // 메인으로 넘어가는 시간 (intro.module.css의 .le
 
 export function IntroSplash({ onDone }: { onDone?: () => void }) {
   const [phase, setPhase] = useState<Phase>(() => (introDone ? 'done' : 'ready'))
+  const lang = useLang()
 
   const stamp = () => {
     if (claimStamp()) setPhase('stamped')
@@ -58,7 +61,7 @@ export function IntroSplash({ onDone }: { onDone?: () => void }) {
   return (
     <div className={styles.overlay} data-phase={phase} onClick={stamp}>
       {/* 1번 화면: 문구만 */}
-      <h1 className={styles.title}>시작할까요?</h1>
+      <h1 className={styles.title} lang={lang}>{tr(SHELL, 'introTitle', lang)}</h1>
       {/* 2번 화면: 도장이 쾅 찍힘 */}
       <div className={styles.target} aria-hidden="true">
         <span className={styles.ripple} />

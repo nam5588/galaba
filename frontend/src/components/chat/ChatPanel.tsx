@@ -6,15 +6,11 @@ import { AssistantMessage, ErrorMessage, PendingMessage, UserMessage } from './C
 import styles from './chat.module.css'
 import panel from './panel.module.css'
 import type { ChatController } from './useChat'
+import { tr, useLang } from '@/lib/i18n'
+import { CHAT_T } from '@/lib/i18n/chat'
 
-/** PRD 3장 시연 질문. 첫 번째(시나리오 5)가 시연의 주인공이다. */
-const HERO_QUESTION = '이번 주에 내가 챙겨야 할 거 정리해줘'
-const SUGGESTIONS = [
-  '내 비자 언제까지야? 연장하려면 뭐 해야 돼?',
-  '오늘 수업 뭐 있고, 휴강 공지 있어?',
-  'Can I work at a convenience store on weekends?',
-  '휴학하면 어떻게 돼?',
-]
+/** PRD 3장 시연 질문(CHAT_T 키). 첫 번째(시나리오 5)가 시연의 주인공이다. 화면 언어로 보낸다. */
+const SUGGESTIONS = ['qVisa', 'qToday', 'qJob', 'qLeave'] as const
 
 export interface ChatPanelHandle {
   focus: () => void
@@ -23,6 +19,9 @@ export interface ChatPanelHandle {
 /** 메인 가운데(1번 영역) LLM 채팅창: 빈 화면 → 대화 스레드, 아래에 질문 입력. 이 영역만 스크롤된다. */
 export const ChatPanel = forwardRef<ChatPanelHandle, { chat: ChatController }>(function ChatPanel({ chat }, ref) {
   const { messages, pending, ask, retry, reset } = chat
+  const lang = useLang()
+  const t = (key: keyof typeof CHAT_T) => tr(CHAT_T, key, lang)
+  const heroQuestion = t('qHero')
   const [draft, setDraft] = useState('')
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const scrollerRef = useRef<HTMLDivElement>(null)
@@ -59,15 +58,15 @@ export const ChatPanel = forwardRef<ChatPanelHandle, { chat: ChatController }>(f
   const hasMessages = messages.length > 0
 
   return (
-    <section className={panel.panel} aria-label="Dojang AI 채팅">
+    <section className={panel.panel} aria-label={t('panelAria')}>
       {hasMessages && (
         <div className={panel.panelBar}>
           <span>
-            <Sparkles size={15} /> Dojang AI 상담
+            <Sparkles size={15} /> {t('consult')}
           </span>
           <button type="button" className={styles.ghostButton} onClick={() => { reset(); inputRef.current?.focus() }}>
             <RotateCcw size={14} />
-            <span>새 대화</span>
+            <span>{t('newChat')}</span>
           </button>
         </div>
       )}
@@ -79,7 +78,7 @@ export const ChatPanel = forwardRef<ChatPanelHandle, { chat: ChatController }>(f
               <div key={m.id} data-message={m.role} className={styles.message}>
                 {m.role === 'user' && <UserMessage text={m.content} />}
                 {m.role === 'assistant' && <AssistantMessage data={m.data} />}
-                {m.role === 'error' && <ErrorMessage text={m.content} onRetry={i === messages.length - 1 && !pending ? () => retry(i) : undefined} />}
+                {m.role === 'error' && <ErrorMessage kind={m.error} detail={m.detail} onRetry={i === messages.length - 1 && !pending ? () => retry(i) : undefined} />}
               </div>
             ))}
             {pending && (
@@ -91,16 +90,16 @@ export const ChatPanel = forwardRef<ChatPanelHandle, { chat: ChatController }>(f
           </div>
         ) : (
           <div className={panel.empty}>
-            <h1 className={panel.emptyTitle}>귀찮은걸 물어보세요</h1>
-            <p className={panel.emptyLead}>비자·보험 기한, 수업과 휴강, 알바, 학칙까지. 필요한 걸 찾아 출처와 함께 알려드려요.</p>
+            <h1 className={panel.emptyTitle}>{t('emptyTitle')}</h1>
+            <p className={panel.emptyLead}>{t('emptyLead')}</p>
             <div className={panel.suggestions}>
-              <button type="button" className={`${panel.suggestion} ${panel.suggestionHero}`} onClick={() => void ask(HERO_QUESTION)}>
+              <button type="button" className={`${panel.suggestion} ${panel.suggestionHero}`} onClick={() => void ask(heroQuestion)}>
                 <ListChecks size={15} />
-                {HERO_QUESTION}
+                {heroQuestion}
               </button>
-              {SUGGESTIONS.map((q) => (
-                <button key={q} type="button" className={panel.suggestion} onClick={() => void ask(q)}>
-                  {q}
+              {SUGGESTIONS.map((key) => (
+                <button key={key} type="button" className={panel.suggestion} onClick={() => void ask(t(key))}>
+                  {t(key)}
                 </button>
               ))}
             </div>
@@ -117,8 +116,8 @@ export const ChatPanel = forwardRef<ChatPanelHandle, { chat: ChatController }>(f
       >
         <div className="ask-heading">
           <Sparkles size={20} />
-          <strong>궁금한 걸 물어보세요!</strong>
-          <span>DOJANG AI가 학교 생활, 비자, 수강신청, 생활 정보 등 무엇이든 도와드립니다.</span>
+          <strong>{t('askTitle')}</strong>
+          <span>{t('askDesc')}</span>
         </div>
         <div className={`ask-input ${panel.inputRow}`}>
           <Paperclip size={20} aria-hidden="true" />
@@ -126,8 +125,8 @@ export const ChatPanel = forwardRef<ChatPanelHandle, { chat: ChatController }>(f
             ref={inputRef}
             rows={1}
             value={draft}
-            aria-label="Dojang에게 질문하기"
-            placeholder="예) 비자 연장에 필요한 서류가 무엇인가요? (English OK)"
+            aria-label={t('inputAria')}
+            placeholder={t('placeholder')}
             onChange={(e) => {
               setDraft(e.target.value)
               const el = e.currentTarget
@@ -142,9 +141,9 @@ export const ChatPanel = forwardRef<ChatPanelHandle, { chat: ChatController }>(f
             }}
           />
           <button type="button" tabIndex={-1} aria-hidden="true">
-            <Globe2 size={17} />웹 검색
+            <Globe2 size={17} />{t('webSearch')}
           </button>
-          <button type="submit" className="send-button" disabled={pending || !draft.trim()} aria-label={pending ? '답변을 기다리는 중' : '질문 보내기'}>
+          <button type="submit" className="send-button" disabled={pending || !draft.trim()} aria-label={pending ? t('waiting') : t('send')}>
             {pending ? <LoaderCircle size={20} className={styles.spin} /> : <ArrowUp size={21} strokeWidth={2.6} />}
           </button>
         </div>

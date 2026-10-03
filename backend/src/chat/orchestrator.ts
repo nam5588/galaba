@@ -11,6 +11,8 @@ export interface ChatTurn {
   role: "user" | "assistant";
   content: string;
 }
+export const CHAT_LANGS = ["ko", "en", "uz", "ru"] as const;
+export type ChatLang = (typeof CHAT_LANGS)[number];
 export type SourceKind = "regulation" | "notice" | "deadline" | "timetable" | "job" | "other";
 export interface ChatSource {
   title: string;
@@ -72,9 +74,19 @@ const RULES = `너는 Dojang이야. 국민대학교 외국인 유학생의 학�
 - 사용자를 부를 때는 프로필 name의 이름을 쓴다(예: 무하마드님).
 - 짧게: 핵심 답을 첫 줄에, 전체 3~10줄. 목록은 "- ", 강조는 **굵게**만 쓴다.`;
 
-function systemPrompt(): string {
+// 화면 언어가 en/uz/ru면 질문 언어와 상관없이 그 언어로 답한다. ko·없음이면 RULES의 "질문한 언어로" 그대로.
+const LANG_RULE: Record<Exclude<ChatLang, "ko">, string> = {
+  en: "영어(English)",
+  uz: "우즈베크어(라틴 문자, O'zbekcha)",
+  ru: "러시아어(Русский)",
+};
+
+function systemPrompt(lang?: ChatLang): string {
   const today = todayKST();
-  return `${RULES}\n\n오늘: ${today} (${weekdayKo(today)}요일, 한국 시간)\n데모 사용자 프로필:\n${JSON.stringify(loadDemoUser(), null, 1)}`;
+  const base = `${RULES}\n\n오늘: ${today} (${weekdayKo(today)}요일, 한국 시간)\n데모 사용자 프로필:\n${JSON.stringify(loadDemoUser(), null, 1)}`;
+  if (!lang || lang === "ko") return base;
+  // 캐시가 앞부분을 재사용하도록 언어 규칙은 맨 끝에 붙인다
+  return `${base}\n\n답변 언어: 사용자가 화면 언어로 ${LANG_RULE[lang]}를 골랐다. 질문이 한국어여도 답 전체를 반드시 ${LANG_RULE[lang]}로 쓴다(사용자 이름도 그 언어 표기로, 예: Muhammad). 도구에 보내는 검색어는 계속 한국어로 보낸다. 캘린더 버튼 안내 문장은 create_calendar_event를 실제로 불렀을 때만 그 언어로 쓴다.`;
 }
 
 const KIND_BY_TOOL: Record<string, SourceKind> = {
@@ -210,13 +222,13 @@ async function offlineAnswer(question: string, notice?: string): Promise<ChatRes
 }
 
 // ---------- 메인 루프 ----------
-export async function chat(history: ChatTurn[]): Promise<ChatResponse> {
+export async function chat(history: ChatTurn[], lang?: ChatLang): Promise<ChatResponse> {
   const question = history.at(-1)?.content ?? "";
   if (!client) return offlineAnswer(question);
 
   const state = newState();
   const messages: Anthropic.MessageParam[] = history.map((t) => ({ role: t.role, content: t.content }));
-  const system = systemPrompt();
+  const system = systemPrompt(lang);
   let calls = 0;
   let extras = true; // 게이트웨이가 effort/cache 옵션을 거부하면 끄고 다시 시도
   let earlierText = ""; // 도구 호출과 함께 쓴 긴 본문(마지막 답이 너무 짧을 때 대신 보여준다)

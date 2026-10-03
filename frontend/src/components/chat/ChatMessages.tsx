@@ -3,10 +3,20 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { BookMarked, Bot, CalendarPlus, Check, ChevronDown, CloudOff, ExternalLink, RotateCcw, WifiOff, Workflow, type LucideIcon } from 'lucide-react'
 import { formatShortDate, type ChatAction, type ChatResponse, type ChatSource, type ChatStep } from '@/lib/chat'
+import { tr, useLang, type Lang } from '@/lib/i18n'
+import { CHAT_T } from '@/lib/i18n/chat'
 import { useCalendarActionsEnabled } from '@/lib/settings'
 import { ChatMarkdown } from './ChatMarkdown'
 import { SOURCE_ICONS, toolMeta } from './tools'
 import styles from './chat.module.css'
+import type { ChatErrorKind } from './useChat'
+
+type Key = keyof typeof CHAT_T
+/** 화면 언어로 CHAT_T 문구 꺼내기 */
+function useT() {
+  const lang = useLang()
+  return { lang, t: (key: Key, vars?: Record<string, string | number>) => tr(CHAT_T, key, lang, vars) }
+}
 
 const stagger = (i: number) => ({ '--i': i }) as CSSProperties
 
@@ -38,10 +48,11 @@ export function UserMessage({ text }: { text: string }) {
 export function AssistantMessage({ data }: { data: ChatResponse }) {
   // 설정 > 캘린더 연동을 끄면 '구글 캘린더에 추가' 버튼을 숨긴다
   const [calendarOn] = useCalendarActionsEnabled()
+  const { t } = useT()
   const offline = data.mode === 'offline' ? (
-    <span className={styles.offlineBadge} title="AI 키 없이 학칙 검색 결과만으로 답했어요">
+    <span className={styles.offlineBadge} title={t('offlineTitle')}>
       <CloudOff size={12} />
-      오프라인 모드(학칙 검색 결과만)
+      {t('offlineBadge')}
     </span>
   ) : null
 
@@ -49,7 +60,7 @@ export function AssistantMessage({ data }: { data: ChatResponse }) {
     <BotRow meta={offline}>
       <div className={styles.botCard}>
         {(data.toolsUsed.length > 0 || data.steps.length > 0) && <ToolsBar tools={data.toolsUsed} steps={data.steps} />}
-        {data.answer.trim() ? <ChatMarkdown text={data.answer} /> : <p className={styles.mutedText}>답변 내용이 비어 있어요. 질문을 조금 바꿔서 다시 물어봐 주세요.</p>}
+        {data.answer.trim() ? <ChatMarkdown text={data.answer} /> : <p className={styles.mutedText}>{t('emptyAnswer')}</p>}
         {data.sources.length > 0 && <SourcesPanel sources={data.sources} />}
         {calendarOn && data.actions.length > 0 && <ActionsPanel actions={data.actions} />}
       </div>
@@ -61,16 +72,17 @@ export function AssistantMessage({ data }: { data: ChatResponse }) {
 function ToolsBar({ tools, steps }: { tools: string[]; steps: ChatStep[] }) {
   const [open, setOpen] = useState(false)
   const detailId = useId()
+  const { lang, t } = useT()
 
   // 이름이 달라도 같은 칩(예: get_notices · get_school_notices)이면 한 번만
-  const chips = tools.map(toolMeta).filter((chip, i, all) => all.findIndex((c) => c.label === chip.label) === i)
-  if (chips.length === 0) chips.push(toolMeta(''))
+  const chips = tools.map((tool) => toolMeta(tool, lang)).filter((chip, i, all) => all.findIndex((c) => c.label === chip.label) === i)
+  if (chips.length === 0) chips.push(toolMeta('', lang))
 
   const row = (
     <>
       <span className={styles.toolsLabel}>
         <Workflow size={13} aria-hidden="true" />
-        사용한 도구
+        {t('toolsUsed')}
       </span>
       <span className={styles.toolChips}>
         {chips.map(({ label, icon: Icon }, i) => (
@@ -90,7 +102,7 @@ function ToolsBar({ tools, steps }: { tools: string[]; steps: ChatStep[] }) {
       <button type="button" className={`${styles.toolsRow} ${styles.toolsToggle}`} aria-expanded={open} aria-controls={detailId} onClick={() => setOpen((v) => !v)}>
         {row}
         <span className={styles.toolsMore}>
-          {open ? '접기' : `${steps.length}단계 보기`}
+          {open ? t('collapse') : t('showSteps', { n: steps.length })}
           <ChevronDown size={14} className={styles.chevron} aria-hidden="true" />
         </span>
       </button>
@@ -104,11 +116,11 @@ function ToolsBar({ tools, steps }: { tools: string[]; steps: ChatStep[] }) {
                   <Icon size={13} strokeWidth={2.3} aria-hidden="true" />
                 </span>
                 <span className={styles.stepText}>
-                  {/* FD 도구에 label이 없으면 백엔드가 도구 이름을 그대로 보낸다 -> 한글 이름으로 */}
-                  <span className={styles.stepLabel}>{step.label && step.label !== step.tool ? step.label : toolMeta(step.tool).label}</span>
+                  {/* FD 도구에 label이 없으면 백엔드가 도구 이름을 그대로 보낸다 -> 화면 언어 이름으로 */}
+                  <span className={styles.stepLabel}>{stepLabel(step, lang)}</span>
                   {step.tool && <code className={styles.stepTool}>{step.tool}</code>}
                 </span>
-                <Check size={14} className={styles.stepCheck} aria-label="완료" />
+                <Check size={14} className={styles.stepCheck} aria-label={t('done')} />
               </li>
             )
           })}
@@ -116,6 +128,15 @@ function ToolsBar({ tools, steps }: { tools: string[]; steps: ChatStep[] }) {
       )}
     </div>
   )
+}
+
+/** 단계 이름: 한국어 화면이면 백엔드 label 그대로, 다른 언어면 도구 이름을 번역하고 ':' 뒤 검색어만 붙인다 */
+function stepLabel(step: ChatStep, lang: Lang) {
+  const hasLabel = step.label && step.label !== step.tool
+  if (lang === 'ko' && hasLabel) return step.label
+  const name = toolMeta(step.tool, lang).label
+  const detail = hasLabel ? step.label.split(/:\s*/).slice(1).join(': ').trim() : ''
+  return detail ? `${name}: ${detail}` : name
 }
 
 /** 조항처럼 원문(text)이 있으면 펼쳐 보고, 링크만 있으면 새 탭으로 연다. */
@@ -127,6 +148,7 @@ function SourcesPanel({ sources }: { sources: ChatSource[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const excerptId = useId()
   const excerptRef = useRef<HTMLQuoteElement>(null)
+  const { t } = useT()
   const open = openIndex === null ? undefined : ordered[openIndex]
 
   // 답변 맨 아래 칩을 눌러도 펼친 원문이 화면 밖에 숨지 않게
@@ -138,13 +160,13 @@ function SourcesPanel({ sources }: { sources: ChatSource[] }) {
 
   const hasExcerpts = ordered.some(isExpandable)
   const hasLinks = ordered.some((s) => s.url && !isExpandable(s))
-  const hint = [hasExcerpts && '조항을 누르면 원문', hasLinks && '링크는 새 탭'].filter(Boolean).join(' · ')
+  const hint = [hasExcerpts && t('hintExcerpt'), hasLinks && t('hintLinks')].filter(Boolean).join(' · ')
 
   return (
-    <section className={styles.section} aria-label="출처">
+    <section className={styles.section} aria-label={t('sources')}>
       <div className={styles.sectionTitle}>
         <BookMarked size={15} />
-        <span>출처</span>
+        <span>{t('sources')}</span>
         <span className={styles.countPill}>{ordered.length}</span>
         {hint && <small>{hint}</small>}
       </div>
@@ -173,7 +195,7 @@ function SourcesPanel({ sources }: { sources: ChatSource[] }) {
 
           if (source.url) {
             return (
-              <a key={key} className={`${styles.chip} ${styles.chipLink}`} href={source.url} target="_blank" rel="noopener noreferrer" title={`${source.title} (새 탭에서 열기)`}>
+              <a key={key} className={`${styles.chip} ${styles.chipLink}`} href={source.url} target="_blank" rel="noopener noreferrer" title={t('openNewTab', { title: source.title })}>
                 <Icon size={14} aria-hidden="true" />
                 <span>{source.title}</span>
                 <ExternalLink size={12} className={styles.chipExternal} aria-hidden="true" />
@@ -194,10 +216,10 @@ function SourcesPanel({ sources }: { sources: ChatSource[] }) {
           <div className={styles.excerptHead}>
             <strong>{open.title}</strong>
           </div>
-          <p>{open.text || '발췌문이 제공되지 않았어요.'}</p>
+          <p>{open.text || t('noExcerpt')}</p>
           {open.url && (
             <a className={styles.excerptLink} href={open.url} target="_blank" rel="noopener noreferrer">
-              원문 보기
+              {t('viewOriginal')}
               <ExternalLink size={12} aria-hidden="true" />
             </a>
           )}
@@ -208,18 +230,19 @@ function SourcesPanel({ sources }: { sources: ChatSource[] }) {
 }
 
 function ActionsPanel({ actions }: { actions: ChatAction[] }) {
+  const { t } = useT()
   return (
     <section className={styles.section}>
       <div className={styles.sectionTitle}>
         <CalendarPlus size={15} />
-        <span>바로 처리하기</span>
+        <span>{t('quickActions')}</span>
       </div>
       <div className={styles.actions}>
         {actions.map((action, i) => (
           <a key={`${action.url}-${i}`} className={styles.actionButton} href={action.url} target="_blank" rel="noopener noreferrer">
             <CalendarPlus size={18} />
             <span className={styles.actionText}>
-              <strong>구글 캘린더에 추가{action.date && ` · ${formatShortDate(action.date)}`}</strong>
+              <strong>{t('addCalendar')}{action.date && ` · ${formatShortDate(action.date)}`}</strong>
               {action.title && <small>{action.title}</small>}
             </span>
             <ExternalLink size={14} className={styles.actionExternal} />
@@ -230,16 +253,17 @@ function ActionsPanel({ actions }: { actions: ChatAction[] }) {
   )
 }
 
-const PENDING_HINTS = [
-  { tool: 'search_regulations', text: '학칙 찾는 중' },
-  { tool: 'get_deadlines', text: '기한 확인 중' },
-  { tool: 'get_notices', text: '공지 확인 중' },
-  { tool: 'get_timetable', text: '시간표 확인 중' },
-  { tool: 'search_jobs', text: '알바 공고 찾는 중' },
+const PENDING_HINTS: { tool: string; text: Key }[] = [
+  { tool: 'search_regulations', text: 'hintRegs' },
+  { tool: 'get_deadlines', text: 'hintDeadlines' },
+  { tool: 'get_notices', text: 'hintNotices' },
+  { tool: 'get_timetable', text: 'hintTimetable' },
+  { tool: 'search_jobs', text: 'hintJobs' },
 ]
 
 export function PendingMessage() {
   const [hint, setHint] = useState(0)
+  const { t } = useT()
 
   useEffect(() => {
     const timer = window.setInterval(() => setHint((h) => (h + 1) % PENDING_HINTS.length), 1600)
@@ -252,10 +276,10 @@ export function PendingMessage() {
   return (
     <BotRow pending>
       <div className={`${styles.botCard} ${styles.pendingCard}`}>
-        <div className={styles.pendingTitle}>Dojang이 필요한 도구를 고르고 있어요…</div>
+        <div className={styles.pendingTitle}>{t('pendingTitle')}</div>
         <p key={hint} className={styles.pendingHint} aria-hidden="true">
           <Icon size={13} strokeWidth={2.3} />
-          {text}
+          {t(text)}
         </p>
         <div className={styles.skeleton} aria-hidden="true">
           <span />
@@ -267,7 +291,11 @@ export function PendingMessage() {
   )
 }
 
-export function ErrorMessage({ text, onRetry }: { text: string; onRetry?: () => void }) {
+const ERROR_KEY: Record<ChatErrorKind, Key> = { offline: 'errOffline', timeout: 'errTimeout', server: 'errServer' }
+
+export function ErrorMessage({ kind, detail, onRetry }: { kind: ChatErrorKind; detail?: string; onRetry?: () => void }) {
+  const { t } = useT()
+  const text = t(ERROR_KEY[kind], { detail: detail ?? '' })
   return (
     <BotRow>
       <div className={`${styles.botCard} ${styles.errorCard}`} role="alert">
@@ -278,7 +306,7 @@ export function ErrorMessage({ text, onRetry }: { text: string; onRetry?: () => 
         {onRetry && (
           <button type="button" className={styles.retryButton} onClick={onRetry}>
             <RotateCcw size={14} />
-            다시 시도
+            {t('retry')}
           </button>
         )}
       </div>

@@ -2,14 +2,17 @@
 
 import { useRef, useState } from 'react'
 import { sendChat, type ChatResponse, type ChatTurn } from '@/lib/chat'
+import { useLang } from '@/lib/i18n'
+
+/** 에러 말풍선 종류. 문구는 화면 언어로 그릴 때 정한다(CHAT_T의 errOffline/errTimeout/errServer) */
+export type ChatErrorKind = 'offline' | 'timeout' | 'server'
 
 export type UiMessage =
   | { id: string; role: 'user'; content: string }
   | { id: string; role: 'assistant'; content: string; data: ChatResponse }
-  | { id: string; role: 'error'; content: string; retry: string }
+  | { id: string; role: 'error'; error: ChatErrorKind; detail?: string; retry: string }
 
 const REQUEST_TIMEOUT_MS = 90_000
-const OFFLINE_MESSAGE = '서버에 연결할 수 없어요. 백엔드(npm run dev:backend)가 켜져 있는지 확인해주세요.'
 
 let messageSeq = 0
 const nextId = () => `m${++messageSeq}`
@@ -23,13 +26,11 @@ function toHistory(messages: UiMessage[]): ChatTurn[] {
   })
 }
 
-function describeError(error: unknown) {
+function describeError(error: unknown): { error: ChatErrorKind; detail?: string } {
   const name = error instanceof Error || error instanceof DOMException ? error.name : ''
-  if (name === 'TimeoutError') return '답변이 너무 오래 걸리고 있어요. 잠시 후 다시 시도해주세요.'
-  if (error instanceof Error && /^API \d+/.test(error.message)) {
-    return `답변을 만드는 중 서버에서 문제가 생겼어요 (${error.message}). 잠시 후 다시 시도해주세요.`
-  }
-  return OFFLINE_MESSAGE
+  if (name === 'TimeoutError') return { error: 'timeout' }
+  if (error instanceof Error && /^API \d+/.test(error.message)) return { error: 'server', detail: error.message }
+  return { error: 'offline' }
 }
 
 /** 채팅 상태(메시지, 전송 중, 재시도, 새 대화). 화면 배치와 분리해서 메인·다른 화면 어디서든 쓴다. */
@@ -37,6 +38,8 @@ export function useChat() {
   const [messages, setMessages] = useState<UiMessage[]>([])
   const [pending, setPending] = useState(false)
   const requestRef = useRef<AbortController | null>(null)
+  // 화면 언어를 같이 보내 AI가 그 언어로 답하게 한다
+  const lang = useLang()
 
   const ask = async (raw: string, base: UiMessage[] = messages) => {
     const text = raw.trim()
@@ -51,12 +54,12 @@ export function useChat() {
     const timer = window.setTimeout(() => controller.abort(new DOMException('timeout', 'TimeoutError')), REQUEST_TIMEOUT_MS)
 
     try {
-      const data = await sendChat(toHistory(next), controller.signal)
+      const data = await sendChat(toHistory(next), controller.signal, lang)
       if (requestRef.current !== controller) return // 그 사이 "새 대화"를 눌렀다
       setMessages((prev) => [...prev, { id: nextId(), role: 'assistant', content: data.answer, data }])
     } catch (error) {
       if (requestRef.current !== controller) return
-      setMessages((prev) => [...prev, { id: nextId(), role: 'error', content: describeError(error), retry: text }])
+      setMessages((prev) => [...prev, { id: nextId(), role: 'error', ...describeError(error), retry: text }])
     } finally {
       window.clearTimeout(timer)
       if (requestRef.current === controller) {

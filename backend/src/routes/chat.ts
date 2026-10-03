@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { chat, type ChatTurn } from "../chat/orchestrator.js";
+import { chat, CHAT_LANGS, type ChatLang, type ChatTurn } from "../chat/orchestrator.js";
 
 export const chatRouter = Router();
 
-// POST /api/chat  { messages: [{ role: "user" | "assistant", content: string }] }
+// POST /api/chat  { messages: [{ role: "user" | "assistant", content: string }], lang?: "ko" | "en" | "uz" | "ru" }
 chatRouter.post("/", async (req, res) => {
   const raw: unknown = req.body?.messages;
   const messages: ChatTurn[] = Array.isArray(raw)
@@ -24,8 +24,11 @@ chatRouter.post("/", async (req, res) => {
     res.status(400).json({ error: "messages의 마지막은 user 질문이어야 해요" });
     return;
   }
+  // 화면 언어(선택). 모르는 값은 무시 → 질문한 언어로 답한다
+  const rawLang: unknown = req.body?.lang;
+  const lang = CHAT_LANGS.find((l) => l === rawLang) as ChatLang | undefined;
   const started = Date.now();
-  const result = await chat(messages);
-  console.log(`[chat] ${result.mode} ${Date.now() - started}ms steps=${result.steps.length} "${messages.at(-1)?.content.slice(0, 40)}"`);
+  const result = await chat(messages, lang);
+  console.log(`[chat] ${result.mode} ${lang ?? "-"} ${Date.now() - started}ms steps=${result.steps.length} "${messages.at(-1)?.content.slice(0, 40)}"`);
   res.json(result);
 });

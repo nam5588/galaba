@@ -12,6 +12,8 @@ import { WeekSchedule } from '@/components/home/WeekSchedule'
 import { AcademicsSummary } from '@/components/home/AcademicsSummary'
 import { IntroSplash } from '@/components/intro/IntroSplash'
 import { routeOfTask } from '@/lib/fd1'
+import { tr, useLang } from '@/lib/i18n'
+import { CHAT_T } from '@/lib/i18n/chat'
 
 // 메인 = 왼쪽 메뉴(공용 AppShell, 고정) + 가운데 AI 채팅(이 영역만 스크롤) + 오른쪽 시간표·다가오는 일정(고정)
 export default function Page() {
@@ -19,6 +21,7 @@ export default function Page() {
   const fd1 = useFd1()
   const router = useRouter()
   const panelRef = useRef<ChatPanelHandle>(null)
+  const lang = useLang()
 
   const ask = (q: string) => void chat.ask(q)
 
@@ -51,8 +54,8 @@ export default function Page() {
           {/* 다가오는 일정: 무하마드(FD1) 기한 계산. 채팅 get_deadlines와 같은 데모 사용자 */}
           <section className="panel upcoming-panel">
             <div className="section-heading">
-              <div className="heading-title"><CalendarDays size={21} strokeWidth={2.5} /><h2>다가오는 일정</h2></div>
-              <button className="text-action" onClick={() => ask('이번 주에 내가 챙겨야 할 거 정리해줘')}>AI로 정리<ChevronRight size={16} /></button>
+              <div className="heading-title"><CalendarDays size={21} strokeWidth={2.5} /><h2>{tr(CHAT_T, 'upcoming', lang)}</h2></div>
+              <button className="text-action" onClick={() => ask(tr(CHAT_T, 'qHero', lang))}>{tr(CHAT_T, 'aiSummary', lang)}<ChevronRight size={16} /></button>
             </div>
             <div className="upcoming-list">
               <Fd1UpcomingRows fd1={fd1} onOpenTask={(type) => router.push(routeOfTask(type))} />
