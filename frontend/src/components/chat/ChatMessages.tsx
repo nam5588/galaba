@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { BookMarked, Bot, CalendarPlus, Check, ChevronDown, CloudOff, ExternalLink, RotateCcw, WifiOff, Workflow, type LucideIcon } from 'lucide-react'
 import { formatShortDate, type ChatAction, type ChatResponse, type ChatSource, type ChatStep } from '@/lib/chat'
+import { useCalendarActionsEnabled } from '@/lib/settings'
 import { ChatMarkdown } from './ChatMarkdown'
 import { SOURCE_ICONS, toolMeta } from './tools'
 import styles from './chat.module.css'
@@ -35,6 +36,8 @@ export function UserMessage({ text }: { text: string }) {
 }
 
 export function AssistantMessage({ data }: { data: ChatResponse }) {
+  // 설정 > 캘린더 연동을 끄면 '구글 캘린더에 추가' 버튼을 숨긴다
+  const [calendarOn] = useCalendarActionsEnabled()
   const offline = data.mode === 'offline' ? (
     <span className={styles.offlineBadge} title="AI 키 없이 학칙 검색 결과만으로 답했어요">
       <CloudOff size={12} />
@@ -48,7 +51,7 @@ export function AssistantMessage({ data }: { data: ChatResponse }) {
         {(data.toolsUsed.length > 0 || data.steps.length > 0) && <ToolsBar tools={data.toolsUsed} steps={data.steps} />}
         {data.answer.trim() ? <ChatMarkdown text={data.answer} /> : <p className={styles.mutedText}>답변 내용이 비어 있어요. 질문을 조금 바꿔서 다시 물어봐 주세요.</p>}
         {data.sources.length > 0 && <SourcesPanel sources={data.sources} />}
-        {data.actions.length > 0 && <ActionsPanel actions={data.actions} />}
+        {calendarOn && data.actions.length > 0 && <ActionsPanel actions={data.actions} />}
       </div>
     </BotRow>
   )

@@ -23,5 +23,14 @@ describe("FD1 안내 (다국어)", () => {
       TASK_TYPES.map((t) => getFd1Guides(lang).guides[t].checklist.map((c) => c.id).join(","));
     assert.deepEqual(ids("en"), ids("ko"));
     assert.deepEqual(ids("uz"), ids("ko"));
+    assert.deepEqual(ids("ru"), ids("ko"));
+  });
+
+  it("ru: 러시아어 공식 용어로 안내한다", () => {
+    const res = getFd1Guides("ru");
+    assert.equal(res.lang, "ru");
+    assert.equal(res.guides.ARC_REGISTER.title, "Регистрация иностранца (ARC)");
+    assert.equal(res.guides.ARC_EXTEND.title, "Продление срока пребывания");
+    assert.ok(res.disclaimer.includes("1345"));
   });
 });

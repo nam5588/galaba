@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { FD1_LANGS } from "./guides.js";
 import { formatDate, renderReminder } from "./messages.js";
 import { remindersFor } from "./reminders.js";
 
@@ -68,9 +69,10 @@ describe("FD1 알림 문구", () => {
     assert.equal(formatDate("2026-11-15", "ko"), "11월 15일");
     assert.equal(formatDate("2026-11-15", "en"), "Nov 15");
     assert.equal(formatDate("2026-11-15", "uz"), "15-noyabr");
+    assert.equal(formatDate("2026-11-15", "ru"), "15 ноября");
   });
 
-  it("모든 알림이 세 언어로 제목·본문을 만든다", () => {
+  it("모든 알림이 모든 언어로 제목·본문을 만든다", () => {
     const profiles = [
       { visaType: "D-2" as const, entryDate: "2026-09-01" },
       { visaType: "D-2" as const, entryDate: "2026-03-01", arcIssuedDate: "2026-03-20", stayExpiryDate: "2026-11-15", moveDate: "2026-10-01" },
@@ -78,7 +80,7 @@ describe("FD1 알림 문구", () => {
     const days = ["2026-09-01", "2026-09-20", "2026-09-25", "2026-10-01", "2026-10-31", "2026-11-14", "2026-11-29", "2026-12-01"];
     let count = 0;
     for (const profile of profiles) for (const day of days) for (const r of remindersFor(profile, day)) {
-      for (const lang of ["ko", "en", "uz"] as const) {
+      for (const lang of FD1_LANGS) {
         const m = renderReminder(r, lang);
         assert.ok(m.title && m.body && !m.body.includes("undefined"), `${r.key} ${lang}`);
         count++;
@@ -94,5 +96,17 @@ describe("FD1 알림 문구", () => {
     assert.equal(r.key, "ARC_EXTEND:2026-11-15:D-30");
     assert.equal(m.title, "Yashash muddatini uzaytirish");
     assert.equal(m.body, "Muddat tugashiga 30 kun qoldi (15-noyabr). Oldindan tayyorlaning.");
+  });
+
+  it("러시아어: 연장 D-30 알림과 건강보험 월 이름", () => {
+    const profile = { visaType: "D-2" as const, entryDate: "2026-03-01", arcIssuedDate: "2026-03-20", stayExpiryDate: "2026-11-15",
+      paidMonths: ["2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09"] };
+    const [r] = remindersFor(profile, "2026-10-16");
+    const m = renderReminder(r, "ru");
+    assert.equal(m.title, "Продление срока пребывания");
+    assert.equal(m.body, "До крайнего срока осталось 30 дней (15 ноября). Подготовьтесь заранее.");
+    const pay = remindersFor(profile, "2026-10-25").find((x) => x.taskType === "NHIS_PAY");
+    assert.ok(pay, "10월 납부 알림");
+    assert.match(renderReminder(pay, "ru").body, /за октябрь/);
   });
 });

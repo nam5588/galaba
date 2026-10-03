@@ -98,7 +98,7 @@ export interface Fd1PlanResponse {
   rulesVerified: boolean;
 }
 
-export type Fd1Lang = "ko" | "en" | "uz";
+export type Fd1Lang = "ko" | "en" | "uz" | "ru";
 
 export interface Fd1Guide {
   title: string;

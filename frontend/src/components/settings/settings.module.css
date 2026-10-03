@@ -1,0 +1,136 @@
+/* 설정 화면(/settings). 다른 기능 화면과 같은 흰 카드 + 파란 포인트 */
+
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.wide { grid-column: 1 / -1; }
+
+.card {
+  min-width: 0;
+  padding: 20px 22px;
+  border: 1px solid #e0e9f4;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 15px #1b4c8210;
+}
+
+.cardHead { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+.cardIcon { display: grid; place-items: center; flex: 0 0 36px; height: 36px; border-radius: 10px; color: #2f83e6; background: #edf6ff; }
+.cardHead h2 { margin: 2px 0 3px; color: var(--ink); font-size: 17px; letter-spacing: -0.4px; }
+.cardHead p { margin: 0; color: #657995; font-size: 13px; line-height: 1.5; }
+
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.fieldset + .fieldset { margin-top: 16px; }
+.legend { margin-bottom: 8px; padding: 0; color: #3d5a82; font-size: 13px; font-weight: 800; }
+
+/* 라디오·체크박스를 알약 버튼처럼. input은 숨기되 키보드 포커스는 받는다 */
+.options { display: flex; flex-wrap: wrap; gap: 8px; }
+.option { position: relative; display: inline-flex; }
+.option input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.option span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 15px;
+  border: 1px solid #d5e4f7;
+  border-radius: 10px;
+  color: #3d5a82;
+  background: #f8fbff;
+  font-size: 14px;
+  font-weight: 700;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.option:hover span { border-color: #a9cbf3; }
+.option input:checked + span { border-color: #2f83e6; color: #fff; background: #2f83e6; box-shadow: 0 5px 12px #2f83e62e; }
+.option input:focus-visible + span { outline: 2px solid #2f83e6; outline-offset: 2px; }
+.option small { font-size: 11px; font-weight: 700; opacity: 0.75; }
+.check { display: inline-grid; place-items: center; width: 16px; height: 16px; border: 1.5px solid currentColor; border-radius: 4px; }
+.check svg { opacity: 0; }
+.option input:checked + span .check svg { opacity: 1; }
+
+.note { margin: 14px 0 0; padding: 10px 12px; border-radius: 9px; color: #3d5a82; background: #f2f7ff; font-size: 13px; line-height: 1.5; }
+.muted { margin: 0; color: #7d8fa9; font-size: 13px; }
+.warnText { margin: 10px 0 0; color: #b4232c; font-size: 12px; font-weight: 700; }
+
+/* 내 정보 */
+.badge { display: inline-block; margin-bottom: 12px; padding: 4px 9px; border-radius: 7px; color: #2679d6; background: #eaf4ff; font-size: 11px; font-weight: 800; }
+.badge.demo { color: #9a6a00; background: #fff4d4; }
+.profile { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 16px; }
+.profile div { padding: 10px 12px; border: 1px solid #e5edf7; border-radius: 10px; background: #f9fbff; }
+.profile dt { color: #7d8fa9; font-size: 11px; font-weight: 700; }
+.profile dd { margin: 4px 0 0; color: var(--ink); font-size: 15px; font-weight: 800; }
+.profile dd.empty { color: #9aa9be; font-weight: 600; }
+
+.linkButton,
+.ghostButton,
+.dangerButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.linkButton { color: #fff; background: #2f83e6; box-shadow: 0 6px 14px #2f83e630; }
+.linkButton:hover { background: #2574d1; }
+.ghostButton { border: 1px solid #d5e4f7; color: #1d6fd6; background: #f6faff; }
+.ghostButton:hover { background: #eaf3ff; }
+.dangerButton { color: #fff; background: #d83e47; }
+.dangerButton:hover { background: #c1323b; }
+.outlineDanger { border: 1px solid #f1c4c8; color: #c0262f; background: #fff8f8; }
+.outlineDanger:hover { background: #fff0f1; }
+
+.linkButton:focus-visible,
+.ghostButton:focus-visible,
+.dangerButton:focus-visible { outline: 2px solid #2f83e6; outline-offset: 2px; }
+
+/* 캘린더 스위치 */
+.switchRow { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 14px; border: 1px solid #e5edf7; border-radius: 11px; background: #f9fbff; cursor: pointer; }
+.switchRow strong { display: block; color: var(--ink); font-size: 14px; }
+.switchRow small { display: block; margin-top: 4px; color: #7d8fa9; font-size: 12px; line-height: 1.45; }
+.switch {
+  position: relative;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 26px;
+  margin: 0;
+  border-radius: 999px;
+  background: #c9d6e7;
+  appearance: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px #1b4c8233; transition: transform 0.15s ease; }
+.switch:checked { background: #2f83e6; }
+.switch:checked::after { transform: translateX(20px); }
+.switch:focus-visible { outline: 2px solid #2f83e6; outline-offset: 2px; }
+.status { margin: 10px 2px 0; color: #657995; font-size: 12px; }
+
+/* 개인정보 */
+.privacy { margin: 0 0 14px; color: #3d5a82; font-size: 14px; line-height: 1.6; }
+.confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 12px 14px; border: 1px solid #f6d9dc; border-radius: 11px; background: #fff9fa; }
+.confirm strong { margin-right: auto; color: #b4232c; font-size: 14px; }
+.done { margin: 10px 0 0; color: #148767; font-size: 13px; font-weight: 700; }
+
+.footer { margin: 22px 2px 0; color: #8496ae; font-size: 12px; line-height: 1.6; }
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .card { padding: 16px; }
+  .profile div { padding: 9px 10px; }
+  .profile dd { font-size: 14px; }
+  .option span { padding: 0 12px; font-size: 13px; }
+  .confirm strong { flex-basis: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option span, .switch, .switch::after { transition: none; }
+}

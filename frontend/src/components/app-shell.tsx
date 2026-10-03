@@ -31,7 +31,7 @@ const navItems = [
   { label: '수강 & 학업', icon: GraduationCap },
   { label: '건강보험', icon: ShieldCheck, href: '/insurance' },
   { label: '알바 찾기', icon: Briefcase }, // 이신애(JOB) /jobs 화면이 올라오면 href: '/jobs' 추가
-  { label: '설정', icon: Settings },
+  { label: '설정', icon: Settings, href: '/settings' },
 ]
 
 const recentChats = [

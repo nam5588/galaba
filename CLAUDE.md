@@ -46,7 +46,7 @@ galaba/
 | GET | `/api/notices?category=&limit=` | `{ source, fetchedAt, items: Notice[] }` (Notice: id, category, tag, tone, title, date, text, url, dept, pinned) | 구현됨 |
 | GET | `/api/schedule?week=` | `{ weekStart, days: ScheduleDay[] }` | 구현됨 |
 | POST | `/api/fd1/plan` | body `{ visaType: "D-2"\|"D-4", entryDate, arcIssuedDate?, stayExpiryDate?, moveDate?, paidMonths?: "YYYY-MM"[], today? }` → `{ today, profile, tasks: Fd1Task[], insurance: Fd1Insurance, rulesVerified }` (Fd1Task: type, dueDate, openDate?, daysLeft, status, urgency) | 구현됨 |
-| GET | `/api/fd1/guides?lang=ko\|en\|uz` | `{ lang, guides: Record<Fd1TaskType, { title, summary, checklist[], links[] }>, disclaimer, sources }` | 구현됨 |
+| GET | `/api/fd1/guides?lang=ko\|en\|uz\|ru` | `{ lang, guides: Record<Fd1TaskType, { title, summary, checklist[], links[] }>, disclaimer, sources }` | 구현됨 |
 | POST | `/api/fd1/reminders` | body: `/api/fd1/plan`과 같은 profile + `lang?` → `{ today, lang, items: { key, taskType, milestone, dueDate, daysLeft, month?, title, body }[] }` (사이트 알림 벨) | 구현됨 |
 | GET | `/api/fd1/demo-profile` | `Fd1Profile` (data/demo-user.json 기준, 채팅 get_deadlines와 같은 사용자) | 구현됨 |
 | POST | `/api/chat` `{ messages: [{role, content}] }` | `{ answer, toolsUsed: string[], sources: [{title, url?, kind, text?}], steps: [{tool, label}], actions: [{type:"calendar", title, date, url}], mode: "claude"\|"offline" }` (PRD 5장 + 화면용 필드) | 구현됨 |
@@ -59,7 +59,8 @@ galaba/
 - v0에서 새 화면을 가져올 때: `v0-import` 스킬.
 - `next build`의 "multiple lockfiles / workspace root" 경고는 루트와 frontend에 lock 파일이 따로 있어서 생긴다. 빌드에는 영향이 없다.
 
-- FD1(체류·건강보험): `/visa`, `/insurance` 화면은 `components/fd1/`, 데이터·문구(ko/en/uz)는 `lib/fd1.ts`. 상단 언어 선택·알림 벨(`Fd1TopActions`)은 홈과 `AppShell`에 들어 있다. DB 연결 전까지 내 정보·납부 체크·읽은 알림은 localStorage(`fd1.*`)에 저장하고, 없으면 데모 사용자(`/api/fd1/demo-profile`)를 보여준다. 언어 선택은 아직 FD1 부분에만 적용된다. 데모 발표 때는 `?today=2026-10-16`처럼 날짜를 고정할 수 있다(`?today=`로 해제, 화면에 배너 표시).
+- FD1(체류·건강보험): `/visa`, `/insurance` 화면은 `components/fd1/`, 데이터·문구(ko/en/uz/ru)는 `lib/fd1.ts`. 상단 언어 선택·알림 벨(`Fd1TopActions`)은 홈과 `AppShell`에 들어 있다. DB 연결 전까지 내 정보·납부 체크·읽은 알림은 localStorage(`fd1.*`)에 저장하고, 없으면 데모 사용자(`/api/fd1/demo-profile`)를 보여준다. 언어 선택은 아직 FD1 부분에만 적용된다. 데모 발표 때는 `?today=2026-10-16`처럼 날짜를 고정할 수 있다(`?today=`로 해제, 화면에 배너 표시).
+- 설정(`/settings`, `app/settings/page.tsx`): 언어(=FD1 언어와 같은 값)·알림 시점/채널(저장만, 발송은 미구현)·AI 답변의 구글 캘린더 버튼 표시·초기화. 값은 `lib/settings.ts`가 localStorage `dojang.settings.*`에 저장한다.
 
 ## 백엔드 메모
 - FD1(체류·건강보험 일정, `docs/PRD-FD1.md`): 계산은 `src/fd1/plan.ts`(순수 함수), 규정 숫자는 `src/fd1/config.ts`에서만 바꾼다. 날짜는 한국 시간 기준 `"YYYY-MM-DD"` 문자열. 화면 문구는 서버가 보내지 않고, 안내·체크리스트 다국어 문구는 `src/fd1/guides.ts`에 있다.

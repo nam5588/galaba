@@ -25,7 +25,7 @@ fd1Router.post("/plan", (req, res) => {
 });
 
 /**
- * GET /api/fd1/guides?lang=ko|en|uz
+ * GET /api/fd1/guides?lang=ko|en|uz|ru
  * 작업별 설명·서류 체크리스트·신청 링크 (기본 ko)
  */
 fd1Router.get("/guides", (req, res) => {
@@ -39,7 +39,7 @@ fd1Router.get("/guides", (req, res) => {
 
 /**
  * POST /api/fd1/reminders
- * body: /plan과 같은 profile + { lang?: "ko"|"en"|"uz", today? }
+ * body: /plan과 같은 profile + { lang?: "ko"|"en"|"uz"|"ru", today? }
  * 오늘 보여줄 알림 (사이트 알림 벨). 읽음 처리는 DB 연결 전까지 프론트가 `key`로 보관한다.
  */
 fd1Router.post("/reminders", (req, res) => {
