@@ -7,11 +7,11 @@ import { Fd1TopActions } from '@/components/fd1/Fd1Header'
 import { useFd1 } from '@/components/fd1/useFd1'
 import {
   Bell,
+  Briefcase,
   CalendarDays,
   ChevronDown,
   FileText,
   GraduationCap,
-  HeartPulse,
   Home,
   Menu,
   MessageCircle,
@@ -22,16 +22,15 @@ import {
   X,
 } from 'lucide-react'
 
-// AI 채팅은 메인(/) 가운데에 있다. 'AI 상담하기'는 메인으로 가서 입력창에 커서를 둔다.
+// AI 채팅은 메인(/) 가운데에 있다. '홈 (AI 상담하기)'를 누르면 메인으로 가고, 메인에서는 입력창에 커서를 둔다.
 const navItems = [
-  { label: '홈', icon: Home, href: '/' },
+  { label: '홈 (AI 상담하기)', icon: Home, href: '/', ai: true },
   { label: '학교 공지사항', icon: Bell, href: '/notices' },
   { label: '시간표', icon: CalendarDays, href: '/schedule' },
-  { label: 'AI 상담하기', icon: MessageCircle, href: '/', ai: true },
   { label: '비자 & 체류', icon: FileText, href: '/visa' },
   { label: '수강 & 학업', icon: GraduationCap },
   { label: '건강보험', icon: ShieldCheck, href: '/insurance' },
-  { label: '생활 정보', icon: HeartPulse },
+  { label: '알바 찾기', icon: Briefcase }, // 이신애(JOB) /jobs 화면이 올라오면 href: '/jobs' 추가
   { label: '설정', icon: Settings },
 ]
 
@@ -96,7 +95,7 @@ export function AppShell({ children, fixed = false, showSearch = true, onRecentC
                 setMobileNavOpen(false)
                 if (ai) onAiNav?.()
               }}
-              className={pathname === href && !ai ? 'nav-item active' : 'nav-item'}
+              className={pathname === href ? 'nav-item active' : 'nav-item'}
             >
               <Icon size={20} /><span>{label}</span>
             </Link>
