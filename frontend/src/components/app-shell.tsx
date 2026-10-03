@@ -94,7 +94,7 @@ export function AppShell({ children, fixed = false, showSearch = true, onRecentC
       <aside className={mobileNavOpen ? 'sidebar mobile-open' : 'sidebar'}>
         <div className="brand-row">
           <Link className="brand-link" href="/" onClick={() => setMobileNavOpen(false)}>
-            <img className="brand-logo" src="/images/logo.png" alt="DOJANG International Student Admin Assistant" />
+            <img className="brand-logo" src="/images/dojang_newlogo.png" alt="DOJANG International Student Admin Assistant" />
           </Link>
           <button className="mobile-close" onClick={() => setMobileNavOpen(false)} aria-label={L('menuClose')}><X size={20} /></button>
         </div>
