@@ -9,6 +9,7 @@ import { useChat } from '@/components/chat/useChat'
 import { Fd1UpcomingRows } from '@/components/fd1/Fd1Upcoming'
 import { useFd1 } from '@/components/fd1/useFd1'
 import { WeekSchedule } from '@/components/home/WeekSchedule'
+import { AcademicsSummary } from '@/components/home/AcademicsSummary'
 import { IntroSplash } from '@/components/intro/IntroSplash'
 import { routeOfTask } from '@/lib/fd1'
 
@@ -45,6 +46,8 @@ export default function Page() {
         <aside className="right-column">
           {/* 시간표: 요리(FD2) /api/schedule */}
           <WeekSchedule />
+          {/* 학업 현황: 수강 & 학업 축약 카드 /api/academics */}
+          <AcademicsSummary />
           {/* 다가오는 일정: 무하마드(FD1) 기한 계산. 채팅 get_deadlines와 같은 데모 사용자 */}
           <section className="panel upcoming-panel">
             <div className="section-heading">

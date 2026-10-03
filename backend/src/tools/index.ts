@@ -5,6 +5,7 @@ import { getNoticesTool } from "./examples.js";
 import { searchJobsTool } from "./search_jobs.js";
 import { getDeadlinesTool } from "./get_deadlines.js";
 import { getTimetableTool } from "./get_timetable.js";
+import { getAcademicsTool } from "./get_academics.js";
 import { searchRegulationsTool } from "./search_regulations.js";
 import type { ToolDef } from "./types.js";
 
@@ -13,6 +14,7 @@ export const TOOLS: ToolDef[] = [
   getDeadlinesTool, // FD1 무하마드 — 실제 계산 (src/fd1)
   getNoticesTool, // FD2 요리 — 실제 공지 API
   getTimetableTool, // FD2 요리 — 화면과 같은 실제 시간표
+  getAcademicsTool, // 수강 & 학업 — 화면과 같은 /api/academics 데이터
   searchJobsTool, // FD3 이신애 — /jobs 화면과 같은 공고·매칭(backend/src/jobs 복사본)
   createCalendarEventTool, // '대신 처리' 후보 ①
 ];

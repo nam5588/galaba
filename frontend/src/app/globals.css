@@ -110,3 +110,19 @@ button { border:0; background:none; color:inherit; cursor:pointer; }
   .academics-summary { grid-template-columns:1fr; gap:20px; }
   .academics-cards { grid-template-columns:1fr; }
 }
+
+/* ── 홈 '학업 현황' 축약 카드 ───────────────────────────── */
+.academics-card-home .academics-home-body { display:flex; flex-direction:column; gap:14px; padding:4px 2px 8px; }
+.academics-home-progress { display:flex; flex-direction:column; gap:7px; }
+.academics-home-progress-head { display:flex; align-items:baseline; justify-content:space-between; }
+.academics-home-progress-head span { color:#657995; font-size:13px; font-weight:700; }
+.academics-home-progress-head strong { font-size:20px; color:var(--blue); letter-spacing:-0.6px; }
+.academics-home-progress small { color:#8094b0; font-size:12px; }
+.academics-home-gpa { display:flex; align-items:baseline; gap:7px; padding:11px 14px; border-radius:12px; background:#f5f9ff; border:1px solid #e5edf7; }
+.academics-home-gpa span { color:#657995; font-size:12px; font-weight:700; }
+.academics-home-gpa strong { margin-left:auto; font-size:22px; letter-spacing:-1px; }
+.academics-home-gpa small { color:#8094b0; font-size:12px; }
+.academics-home-gpa.safe strong { color:#1b9e5f; }
+.academics-home-gpa.warning strong { color:#b9790a; }
+.academics-home-gpa.danger { background:#fdeaea; border-color:#f6d4d4; }
+.academics-home-gpa.danger strong { color:#d64545; }
