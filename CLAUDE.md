@@ -45,6 +45,7 @@ galaba/
 | GET | `/api/health` | `{ status: "ok", timestamp }` | 구현됨 |
 | GET | `/api/notices?category=&limit=` | `{ source, fetchedAt, items: Notice[] }` (Notice: id, category, tag, tone, title, date, text, url, dept, pinned) | 구현됨 |
 | GET | `/api/schedule?week=` | `{ weekStart, days: ScheduleDay[] }` | 구현됨 |
+| GET | `/api/academics` | `{ profile, credits, gpa, requirements: AcademicRequirement[], disclaimer, sources }` (데모 사용자 기준. credits: earned/required/remaining/progress, gpa: value/scale/status/warningBelow, status: safe\|warning\|danger. 계산 `src/academics/compute.ts`, 기준값 `src/academics/config.ts`) | 구현됨 |
 | POST | `/api/fd1/plan` | body `{ visaType: "D-2"\|"D-4", entryDate, arcIssuedDate?, stayExpiryDate?, moveDate?, paidMonths?: "YYYY-MM"[], today? }` → `{ today, profile, tasks: Fd1Task[], insurance: Fd1Insurance, rulesVerified }` (Fd1Task: type, dueDate, openDate?, daysLeft, status, urgency) | 구현됨 |
 | GET | `/api/fd1/guides?lang=ko\|en\|uz\|ru` | `{ lang, guides: Record<Fd1TaskType, { title, summary, checklist[], links[] }>, disclaimer, sources }` | 구현됨 |
 | POST | `/api/fd1/reminders` | body: `/api/fd1/plan`과 같은 profile + `lang?` → `{ today, lang, items: { key, taskType, milestone, dueDate, daysLeft, month?, title, body }[] }` (사이트 알림 벨) | 구현됨 |
@@ -63,6 +64,7 @@ galaba/
 - 설정(`/settings`, `app/settings/page.tsx`): 언어(=FD1 언어와 같은 값)·알림 시점/채널(저장만, 발송은 미구현)·AI 답변의 구글 캘린더 버튼 표시·초기화. 값은 `lib/settings.ts`가 localStorage `dojang.settings.*`에 저장한다.
 
 ## 백엔드 메모
+- 수강·학업(`docs/prd-academics.md`, `/api/academics`): 계산은 `src/academics/compute.ts`(순수 함수, `computeAcademics`), 졸업 학점·GPA 경고선 등 기준 숫자는 `src/academics/config.ts`에서만 바꾼다. 데모 사용자(`data/demo-user.json`)의 `earnedCredits`/`graduationCreditsRequired`/`gpa` 등을 읽는다. 화면 문구·GPA 상태(safe/warning/danger)는 서버가 수치로 판정해 보낸다. 테스트 `src/academics/compute.test.ts`.
 - FD1(체류·건강보험 일정, `docs/PRD-FD1.md`): 계산은 `src/fd1/plan.ts`(순수 함수), 규정 숫자는 `src/fd1/config.ts`에서만 바꾼다. 날짜는 한국 시간 기준 `"YYYY-MM-DD"` 문자열. 화면 문구는 서버가 보내지 않고, 안내·체크리스트 다국어 문구는 `src/fd1/guides.ts`에 있다.
 - 테스트: `npm --prefix backend test` (node:test + tsx, `src/**/*.test.ts`). `npm run check`에 포함된다.
 - **AI 채팅(메인, 김희경)**: 설계는 `docs/PRD-ai-chat-orchestration.md`. `backend/src/chat/orchestrator.ts`가 LLM tool use 루프(도구 호출 최대 5회)로 `backend/src/tools/index.ts`에 등록된 도구를 골라 부른다. LLM은 학교 AI 게이트웨이(`LLM_BASE_URL`=https://ai.cs.kookmin.ac.kr, Claude 호환, 모델 `CHAT_MODEL`=claude-opus-5. Opus 5.5는 게이트웨이에 없음). 키(`LLM_AUTH_TOKEN`)가 없거나 호출이 실패하면(잔액 부족 포함) 도구 결과만으로 답하는 오프라인 모드(`mode: "offline"`). ⚠️ `ANTHROPIC_*` 이름은 Claude Code 환경변수와 충돌하니 백엔드에서는 `LLM_*`만 쓴다.

@@ -43,3 +43,45 @@ export interface ScheduleResponse {
   weekStart: string
   days: ScheduleDay[]
 }
+
+// 수강 & 학업 (docs/prd-academics.md)
+export type AcademicStatus = 'safe' | 'warning' | 'danger'
+
+export interface AcademicsProfile {
+  name: string
+  university: string
+  department: string
+  year: number
+  semester: string
+  status: string
+}
+
+export interface AcademicsCredits {
+  earned: number
+  required: number
+  remaining: number
+  progress: number
+}
+
+export interface AcademicsGpa {
+  value: number
+  scale: number
+  status: AcademicStatus
+  warningBelow: number
+}
+
+export interface AcademicRequirement {
+  id: string
+  title: string
+  summary: string
+  status: AcademicStatus
+}
+
+export interface AcademicsResponse {
+  profile: AcademicsProfile
+  credits: AcademicsCredits
+  gpa: AcademicsGpa
+  requirements: AcademicRequirement[]
+  disclaimer: string
+  sources: { label: string; url: string }[]
+}

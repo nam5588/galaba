@@ -5,6 +5,7 @@ import { fd1Router } from "./routes/fd1.js";
 import { chatRouter } from "./routes/chat.js";
 import { noticesRouter } from "./routes/notices.js";
 import { scheduleRouter } from "./routes/schedule.js";
+import { academicsRouter } from "./routes/academics.js";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 4100;
@@ -19,6 +20,7 @@ app.get("/api/health", (_req, res) => {
 
 app.use("/api/notices", noticesRouter);
 app.use("/api/schedule", scheduleRouter);
+app.use("/api/academics", academicsRouter);
 app.use("/api/fd1", fd1Router);
 app.use("/api/chat", chatRouter);
 

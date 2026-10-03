@@ -133,3 +133,53 @@ export interface Fd1RemindersResponse {
   lang: Fd1Lang;
   items: Fd1ReminderItem[];
 }
+
+// ── 수강 & 학업 (docs/prd-academics.md) ──────────────────────
+
+/** safe: 안전 · warning: 주의(경고선 근접) · danger: 경고 구간 */
+export type AcademicStatus = "safe" | "warning" | "danger";
+
+export interface AcademicsProfile {
+  name: string;
+  university: string;
+  department: string;
+  year: number;
+  /** "2026학년도 2학기 (6번째 학기)" */
+  semester: string;
+  /** "외국인 유학생, 학부 재학" */
+  status: string;
+}
+
+export interface AcademicsCredits {
+  earned: number;
+  required: number;
+  /** required - earned, 음수면 0 */
+  remaining: number;
+  /** 0~100 (반올림 정수). required가 0 이하면 0 */
+  progress: number;
+}
+
+export interface AcademicsGpa {
+  value: number;
+  scale: number;
+  status: AcademicStatus;
+  /** 경고 기준 (이 값 미만이면 danger) */
+  warningBelow: number;
+}
+
+export interface AcademicRequirement {
+  id: string;
+  title: string;
+  summary: string;
+  status: AcademicStatus;
+}
+
+export interface AcademicsResponse {
+  profile: AcademicsProfile;
+  credits: AcademicsCredits;
+  gpa: AcademicsGpa;
+  requirements: AcademicRequirement[];
+  /** 모든 수치는 최종 확인 필요 */
+  disclaimer: string;
+  sources: { label: string; url: string }[];
+}

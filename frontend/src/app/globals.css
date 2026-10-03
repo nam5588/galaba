@@ -49,5 +49,64 @@ button { border:0; background:none; color:inherit; cursor:pointer; }
   .dash-fixed .right-column { overflow:visible; }
 }
 .dash-fixed .top-actions { margin-left:auto; }
-.upcoming-row { color:inherit; text-decoration:none; } .upcoming-row:hover strong { color:#1976e9; } .upcoming-empty { margin:6px 2px; color:#7a8aa6; font-size:12.5px; }
-.brand-link .brand-logo { display:block; } .chat-heading a { display:grid; place-items:center; padding:2px; border-radius:6px; color:inherit; } .chat-heading a:hover { background:#f0f6ff; } span.week-button { cursor:default; }
+.feature-shell .top-actions { margin-left:auto; }
+
+/* ── 수강 & 학업 (/academics) ───────────────────────────── */
+.academics-page { display:flex; flex-direction:column; gap:18px; }
+.academics-summary { display:grid; grid-template-columns:1fr 1.4fr; gap:28px; padding:22px 24px; align-items:center; }
+.academics-profile { display:flex; flex-direction:column; gap:4px; }
+.academics-profile strong { font-size:21px; letter-spacing:-0.5px; }
+.academics-profile span { color:#4a5f80; font-size:13px; }
+.academics-profile small { margin-top:4px; color:#7185a1; font-size:12px; }
+
+.academics-progress { display:flex; flex-direction:column; gap:9px; }
+.academics-progress-head { display:flex; align-items:baseline; justify-content:space-between; }
+.academics-progress-head span { color:#657995; font-size:13px; font-weight:700; }
+.academics-progress-head strong { font-size:26px; color:var(--blue); letter-spacing:-1px; }
+.progress-track { position:relative; height:12px; border-radius:999px; background:#e9f1fc; overflow:hidden; }
+.progress-track i { display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,#4a9bf5,#2e86ee); transition:width .4s ease; }
+.academics-progress small { color:#7185a1; font-size:12px; }
+
+.academics-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.academics-card { position:relative; display:flex; flex-direction:column; gap:3px; padding:18px 20px; border:1px solid #e0e9f4; border-radius:14px; background:white; box-shadow:0 3px 15px #1b4c8210; }
+.academics-card-icon { display:grid; place-items:center; width:40px; height:40px; margin-bottom:6px; border-radius:12px; color:#448fe8; background:#edf6ff; }
+.academics-card > span { color:#657995; font-size:12px; font-weight:700; }
+.academics-card strong { font-size:30px; letter-spacing:-1.4px; line-height:1.1; }
+.academics-card small { color:#8094b0; font-size:12px; }
+.academics-card.gpa.safe .academics-card-icon { color:#1b9e5f; background:#e7f7ee; }
+.academics-card.gpa.warning .academics-card-icon { color:#c98a12; background:#fdf4e3; }
+.academics-card.gpa.danger .academics-card-icon { color:#d64545; background:#fdeaea; }
+
+.status-badge { align-self:flex-start; margin-top:8px; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:800; font-style:normal; }
+.status-badge.safe { color:#1b9e5f; background:#e7f7ee; }
+.status-badge.warning { color:#b9790a; background:#fdf4e3; }
+.status-badge.danger { color:#d64545; background:#fdeaea; }
+
+.academics-requirements { padding:22px 24px; }
+.academics-requirements h2 { margin:0 0 14px; font-size:17px; }
+.academics-requirements ul { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; }
+.requirement { display:flex; gap:13px; padding:14px 16px; border:1px solid #e5edf7; border-radius:12px; background:#fbfdff; }
+.requirement-icon { display:grid; place-items:center; width:34px; height:34px; flex:0 0 auto; border-radius:10px; }
+.requirement.safe .requirement-icon { color:#1b9e5f; background:#e7f7ee; }
+.requirement.warning .requirement-icon { color:#c98a12; background:#fdf4e3; }
+.requirement.danger .requirement-icon { color:#d64545; background:#fdeaea; }
+.requirement-head { display:flex; align-items:center; gap:10px; margin-bottom:4px; }
+.requirement-head strong { font-size:14px; }
+.requirement p { margin:0; color:#60728f; font-size:13px; line-height:1.55; }
+
+.academics-disclaimer { display:flex; align-items:flex-start; gap:7px; margin:4px 0 0; color:#7185a1; font-size:12px; line-height:1.5; }
+.academics-disclaimer svg { flex:0 0 auto; margin-top:2px; color:#9aabc5; }
+.academics-sources { display:flex; flex-wrap:wrap; gap:8px; }
+.academics-sources a { padding:6px 12px; border:1px solid #dce7f5; border-radius:999px; color:#2f83e6; font-size:12px; font-weight:700; text-decoration:none; background:white; }
+.academics-sources a:hover { background:#f0f7ff; }
+
+.academics-skeleton { display:flex; flex-direction:column; gap:18px; }
+.skeleton-block { min-height:92px; border:1px solid #e8eff8; background:linear-gradient(100deg,#f3f8ff 30%,#eaf2fd 50%,#f3f8ff 70%); background-size:200% 100%; animation:academics-shimmer 1.3s ease-in-out infinite; }
+.skeleton-block.tall { min-height:200px; }
+.academics-skeleton .academics-card.skeleton-block { min-height:120px; }
+@keyframes academics-shimmer { 0% { background-position:200% 0; } 100% { background-position:-200% 0; } }
+
+@media (max-width:860px) {
+  .academics-summary { grid-template-columns:1fr; gap:20px; }
+  .academics-cards { grid-template-columns:1fr; }
+}

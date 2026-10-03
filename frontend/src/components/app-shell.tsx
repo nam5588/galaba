@@ -28,7 +28,7 @@ const navItems = [
   { label: '학교 공지사항', icon: Bell, href: '/notices' },
   { label: '시간표', icon: CalendarDays, href: '/schedule' },
   { label: '비자 & 체류', icon: FileText, href: '/visa' },
-  { label: '수강 & 학업', icon: GraduationCap },
+  { label: '수강 & 학업', icon: GraduationCap, href: '/academics' },
   { label: '건강보험', icon: ShieldCheck, href: '/insurance' },
   { label: '알바 찾기', icon: Briefcase }, // 이신애(JOB) /jobs 화면이 올라오면 href: '/jobs' 추가
   { label: '설정', icon: Settings, href: '/settings' },
