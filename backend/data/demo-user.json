@@ -1,0 +1,17 @@
+{
+  "_note": "데모용 가상 프로필 (PRD 7.6). FD1(무하마드)이 채운다. 실제 개인정보 아님.",
+  "name": "무하마드 (Muhammad)",
+  "status": "외국인 유학생, 학부 재학",
+  "university": "국민대학교",
+  "department": "컴퓨터공학과",
+  "year": 3,
+  "semester": "2026학년도 2학기 (6번째 학기)",
+  "earnedCredits": 92,
+  "graduationCreditsRequired": 130,
+  "gpa": 3.42,
+  "leaveOfAbsenceUsedSemesters": 0,
+  "visa": { "type": "D-2 (유학)", "expires": "2026-11-15" },
+  "healthInsurance": { "type": "국민건강보험 지역가입자" },
+  "partTimeWorkPermit": "미신청",
+  "koreanLevel": "TOPIK 4급"
+}

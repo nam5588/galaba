@@ -7,9 +7,11 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test $(find src -name '*.test.ts')"
+    "test": "tsx --test $(find src -name '*.test.ts')",
+    "build:rag": "tsx scripts/build-regulations.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "cheerio": "^1.2.0",
     "cors": "^2.8.6",
     "dotenv": "^18.0.5",

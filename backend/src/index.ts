@@ -2,6 +2,7 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import { fd1Router } from "./routes/fd1.js";
+import { chatRouter } from "./routes/chat.js";
 import { noticesRouter } from "./routes/notices.js";
 
 const app = express();
@@ -17,6 +18,7 @@ app.get("/api/health", (_req, res) => {
 
 app.use("/api/notices", noticesRouter);
 app.use("/api/fd1", fd1Router);
+app.use("/api/chat", chatRouter);
 
 // Vercel에서는 플랫폼이 서버를 띄우므로 로컬에서만 listen
 if (!process.env.VERCEL) {

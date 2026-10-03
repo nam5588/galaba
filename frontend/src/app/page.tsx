@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   ArrowRight,
   Bell,
@@ -60,15 +61,17 @@ function SectionHeading({ icon: Icon, title, action = '전체 보기' }: { icon:
 }
 
 export default function Page() {
+  const router = useRouter()
   const [activeNav, setActiveNav] = useState('홈')
   const [question, setQuestion] = useState('')
-  const [submitted, setSubmitted] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+
+  // AI 상담 화면(/chat)으로 이동. 질문이 있으면 ?q=로 넘겨서 바로 물어본다.
+  const openChat = (q = '') => router.push(q.trim() ? `/chat?q=${encodeURIComponent(q.trim())}` : '/chat')
 
   const submitQuestion = () => {
     if (!question.trim()) return
-    setSubmitted(true)
-    setQuestion('')
+    openChat(question)
   }
 
   return (
@@ -79,7 +82,7 @@ export default function Page() {
           <button className="mobile-close" onClick={() => setMobileNavOpen(false)} aria-label="메뉴 닫기"><X size={20} /></button>
         </div>
         <nav className="main-nav" aria-label="주요 메뉴">
-          {navItems.map(({ label, icon: Icon }) => <button key={label} onClick={() => { setActiveNav(label); setMobileNavOpen(false) }} className={activeNav === label ? 'nav-item active' : 'nav-item'}><Icon size={20} /><span>{label}</span></button>)}
+          {navItems.map(({ label, icon: Icon }) => <button key={label} onClick={() => { if (label === 'AI 상담하기') { openChat(); return } setActiveNav(label); setMobileNavOpen(false) }} className={activeNav === label ? 'nav-item active' : 'nav-item'}><Icon size={20} /><span>{label}</span></button>)}
         </nav>
         <div className="chat-list">
           <div className="chat-heading"><span>이전 채팅들</span><Plus size={18} /></div>
@@ -91,7 +94,7 @@ export default function Page() {
       <div className="content-area">
         <header className="topbar">
           <button className="mobile-menu" onClick={() => setMobileNavOpen(true)} aria-label="메뉴 열기"><MoreHorizontal size={24} /></button>
-          <div className="search-box"><Search size={20} /><input aria-label="검색" placeholder="학교 생활, 비자, 수강신청 등 궁금한 내용을 질문해보세요... (예: 다음 학기 수강신청 일정이 언제인가요?)" /></div>
+          <div className="search-box"><Search size={20} /><input aria-label="검색" onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing && e.keyCode !== 229) openChat(e.currentTarget.value) }} placeholder="학교 생활, 비자, 수강신청 등 궁금한 내용을 질문해보세요... (예: 다음 학기 수강신청 일정이 언제인가요?)" /></div>
           <div className="top-actions"><button><Globe2 size={19} />한국어<ChevronDown size={14} /></button><button className="icon-button notification"><Bell size={21} /><i /></button><div className="profile"><div className="avatar">김</div><div><strong>문함마드</strong><small>컴퓨터공학과 · 3학년</small></div><ChevronDown size={15} /></div></div>
         </header>
 
@@ -106,7 +109,7 @@ export default function Page() {
 
             <section className="panel status-panel"><div className="section-heading"><div className="heading-title"><span className="status-spark">✦</span><h2>내 주요 상태</h2></div><small className="updated">마지막 업데이트: 2024. 10. 15. 14:30 <span>↻</span></small></div><div className="status-grid"><StatusCard icon={FileText} tone="red" title="비자 (D-2)" badge="D-43" text="만료일까지 43일 남았어요. 연장 준비를 시작하세요." /><StatusCard icon={HeartPulse} tone="yellow" title="건강보험" badge="정상 가입" text="현재 국민건강보험이 정상적으로 유지되고 있습니다." /><StatusCard icon={GraduationCap} tone="blue" title="수강 요건" badge="3/5" text="이번 학기 필수 과목 5개 중 3개를 이수했어요." progress /><StatusCard icon={WalletCards} tone="green" title="등록금" badge="납부 완료" text="2026-1학기 등록금이 정상적으로 납부되었습니다." /></div></section>
 
-            <section className="ask-card"><div className="ask-heading"><Sparkles size={20} /><strong>궁금한 걸 물어보세요!</strong><span>UniMate AI가 학교 생활, 비자, 수강신청, 생활 정보 등 무엇이든 도와드립니다.</span></div><div className="ask-input"><Paperclip size={20} /><input value={question} onChange={(e) => { setQuestion(e.target.value); setSubmitted(false) }} onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing && e.keyCode !== 229) submitQuestion() }} placeholder={submitted ? '질문이 접수되었습니다. 곧 답변드릴게요!' : '예) 비자 연장에 필요한 서류가 무엇인가요?'} /><button><Globe2 size={17} />웹 검색</button><button className="send-button" onClick={submitQuestion} aria-label="질문 보내기"><Send size={20} /></button></div></section>
+            <section className="ask-card"><div className="ask-heading"><Sparkles size={20} /><strong>궁금한 걸 물어보세요!</strong><span>UniMate AI가 학교 생활, 비자, 수강신청, 생활 정보 등 무엇이든 도와드립니다.</span></div><div className="ask-input"><Paperclip size={20} /><input value={question} onChange={(e) => setQuestion(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing && e.keyCode !== 229) submitQuestion() }} placeholder="예) 비자 연장에 필요한 서류가 무엇인가요?" /><button><Globe2 size={17} />웹 검색</button><button className="send-button" onClick={submitQuestion} aria-label="질문 보내기"><Send size={20} /></button></div></section>
           </section>
 
           <aside className="right-column"><section className="panel schedule-panel"><div className="section-heading"><div className="heading-title"><CalendarDays size={22} /><h2>시간표</h2></div><button className="week-button">이번 주 <ChevronDown size={15} /></button></div><div className="weekdays">{['월\n10.14', '화\n10.15', '수\n10.16', '목\n10.17', '금\n10.18'].map((day, i) => <button className={i === 2 ? 'selected-day' : ''} key={day}>{day.split('\n').map((line) => <span key={line}>{line}</span>)}</button>)}</div><div className="timeline">{schedule.map(([from, to, title, room, tone]) => <div className="timeline-row" key={title}><div className="time">{from}<br />{to}</div><div className={`timeline-dot ${tone}`} /><div className="class-card"><strong>{title}</strong><span>{room}</span></div></div>)}</div><button className="full-button">전체 시간표 보기 <ArrowRight size={17} /></button></section><section className="panel upcoming-panel"><SectionHeading icon={CalendarDays} title="다가오는 일정" /><div className="upcoming-list">{[['10.20 (월)', '건강보험료 납부 기한', 'D-4', 'red'], ['10.25 (토)', '국제학생 페스티벌', 'D-9', 'yellow'], ['11.03 (월)', '수강신청 시작', 'D-18', 'blue'], ['12.15 (월)', '성적 정정 마감', 'D-60', 'purple']].map(([date, title, badge, tone]) => <div className="upcoming-row" key={title}><span className="upcoming-date">{date}</span><i className={`upcoming-dot ${tone}`} /><strong>{title}</strong><b className={tone}>{badge}</b></div>)}</div></section></aside>

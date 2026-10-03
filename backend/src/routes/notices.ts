@@ -121,7 +121,7 @@ const SAMPLE: Notice[] = [
   },
 ];
 
-async function getNotices(category: string, limit: number): Promise<NoticesResponse> {
+export async function getNotices(category: string, limit: number): Promise<NoticesResponse> {
   const key = `${category}:${limit}`;
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) return { ...hit.data, source: "cache" };
