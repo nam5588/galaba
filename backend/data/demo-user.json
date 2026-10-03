@@ -10,8 +10,19 @@
   "graduationCreditsRequired": 130,
   "gpa": 3.42,
   "leaveOfAbsenceUsedSemesters": 0,
-  "visa": { "type": "D-2 (유학)", "expires": "2026-11-15" },
-  "healthInsurance": { "type": "국민건강보험 지역가입자" },
+  "visa": {
+    "type": "D-2 (유학)",
+    "expires": "2026-11-15"
+  },
+  "healthInsurance": {
+    "type": "국민건강보험 지역가입자"
+  },
   "partTimeWorkPermit": "미신청",
-  "koreanLevel": "TOPIK 4급"
+  "koreanLevel": "TOPIK 4급",
+  "fd1": {
+    "_note": "FD1 일정 계산 입력. 체류만료일은 visa.expires를 쓴다. paidThrough = 건강보험료를 이 달까지 납부함",
+    "entryDate": "2024-02-20",
+    "arcIssuedDate": "2024-03-15",
+    "paidThrough": "2026-09"
+  }
 }
