@@ -50,6 +50,7 @@
 .checklist li { display: flex; gap: 7px; color: #3d5372; font-size: 12.5px; line-height: 1.45; }
 .checklist li::before { content: '✓'; color: #2f86ee; font-weight: 800; }
 .links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.doneButton { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; padding: 6px 12px; border-radius: 8px; background: #3189ed; color: #fff; font-size: 12px; font-weight: 800; }
 .links a { display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 8px; background: #fff; border: 1px solid #d8e5f6; color: #1d6fd6; font-size: 12px; font-weight: 700; text-decoration: none; }
 
 /* 건강보험 */

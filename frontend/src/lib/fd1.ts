@@ -1,4 +1,4 @@
-import { useMemo, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { api } from "@/lib/api";
 
 // FD1 체류·건강보험 일정 (docs/PRD-FD1.md). 타입은 backend/src/types.ts의 FD1 부분과 같은 모양이다.
@@ -84,10 +84,10 @@ export interface Fd1ReminderItem {
 const post = (body: unknown): RequestInit => ({ method: "POST", body: JSON.stringify(body) });
 
 export const fetchDemoProfile = () => api<Fd1Profile>("/api/fd1/demo-profile");
-export const fetchPlan = (profile: Fd1Profile) => api<Fd1Plan>("/api/fd1/plan", post(profile));
+export const fetchPlan = (profile: Fd1Profile, today?: string) => api<Fd1Plan>("/api/fd1/plan", post({ ...profile, today }));
 export const fetchGuides = (lang: Fd1Lang) => api<Fd1Guides>(`/api/fd1/guides?lang=${lang}`);
-export const fetchReminders = (profile: Fd1Profile, lang: Fd1Lang) =>
-  api<{ today: string; lang: Fd1Lang; items: Fd1ReminderItem[] }>("/api/fd1/reminders", post({ ...profile, lang }));
+export const fetchReminders = (profile: Fd1Profile, lang: Fd1Lang, today?: string) =>
+  api<{ today: string; lang: Fd1Lang; items: Fd1ReminderItem[] }>("/api/fd1/reminders", post({ ...profile, lang, today }));
 
 // ---------- 브라우저 저장 (DB 연결 전까지) ----------
 // useSyncExternalStore로 읽어서 서버 렌더(값 없음)와 브라우저 값이 어긋나지 않게 한다.
@@ -134,7 +134,7 @@ export function useStored<T>(key: string): [T | null, (value: T | null) => void]
       return null;
     }
   }, [raw]);
-  const set = (next: T | null) => writeRaw(key, next === null ? null : JSON.stringify(next));
+  const set = useCallback((next: T | null) => writeRaw(key, next === null ? null : JSON.stringify(next)), [key]);
   return [value, set];
 }
 
@@ -142,6 +142,8 @@ export const STORAGE_KEYS = {
   profile: "fd1.profile",
   lang: "fd1.lang",
   readReminders: "fd1.readReminders",
+  /** 데모용 오늘 날짜 (?today=YYYY-MM-DD 로 설정, ?today= 로 해제) */
+  demoToday: "fd1.demoToday",
 };
 
 // ---------- 화면 문구 (FD1-5) ----------
@@ -243,6 +245,26 @@ export const T = {
     uz: "Jadvalni yuklab bo'lmadi. Backend ishlayotganini tekshiring.",
   },
   loading: { ko: "불러오는 중…", en: "Loading…", uz: "Yuklanmoqda…" },
+  demoDate: { ko: "데모 날짜: {date} 기준으로 계산 중", en: "Demo date: calculating as of {date}", uz: "Demo sana: {date} holatiga hisoblanmoqda" },
+  backToToday: { ko: "오늘로 돌아가기", en: "Back to today", uz: "Bugunga qaytish" },
+  done: { ko: "완료했어요", en: "Done", uz: "Bajarildi" },
+  doneArcHint: {
+    ko: "외국인등록을 마쳤나요? 등록일과 체류만료일을 넣으면 다음 일정(건강보험·연장)이 만들어져요.",
+    en: "Registered? Enter the dates to create your next steps (insurance, extension).",
+    uz: "Ro'yxatdan o'tdingizmi? Sanalarni kiriting — keyingi bosqichlar (sug'urta, uzaytirish) yaratiladi.",
+  },
+  doneExtendHint: {
+    ko: "연장을 마쳤나요? 새 체류만료일을 넣으면 다음 연장 일정이 만들어져요.",
+    en: "Extended? Enter your new expiry date to schedule the next extension.",
+    uz: "Uzaytirdingizmi? Yangi tugash sanasini kiriting — keyingi uzaytirish rejalashtiriladi.",
+  },
+  newExpiry: { ko: "새 체류만료일", en: "New expiry date", uz: "Yangi tugash sanasi" },
+  moved: { ko: "이사했어요", en: "I moved", uz: "Ko'chdim" },
+  movedDone: {
+    ko: "이사일을 {date}로 저장했어요. 14일 안에 체류지 변경 신고를 하세요.",
+    en: "Moving date saved as {date}. Report your new address within 14 days.",
+    uz: "Ko'chish sanasi {date} deb saqlandi. 14 kun ichida yangi manzilni xabar qiling.",
+  },
 } satisfies Dict;
 
 export function t(key: keyof typeof T, lang: Fd1Lang, vars?: Record<string, string | number>): string {
@@ -254,4 +276,9 @@ export function t(key: keyof typeof T, lang: Fd1Lang, vars?: Record<string, stri
 /** 알림을 누르면 열 화면 */
 export function routeOfTask(type: Fd1TaskType): "/visa" | "/insurance" {
   return type === "NHIS_PAY" ? "/insurance" : "/visa";
+}
+
+/** 브라우저에서 한국 시간 기준 오늘 */
+export function todayInSeoul(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
 }

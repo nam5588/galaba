@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, type FormEvent } from 'react'
-import { ExternalLink, FileText, Pencil, ShieldCheck } from 'lucide-react'
-import { dDayLabel, shortDate, t, won, type Fd1Lang, type Fd1Profile, type Fd1Task, type VisaType } from '@/lib/fd1'
+import { CheckCircle2, ExternalLink, FileText, Home, Pencil, ShieldCheck } from 'lucide-react'
+import { dDayLabel, shortDate, t, todayInSeoul, won, type Fd1Lang, type Fd1Profile, type Fd1Task, type VisaType } from '@/lib/fd1'
 import type { Fd1State } from './useFd1'
 import styles from './fd1.module.css'
 
@@ -12,6 +12,7 @@ export type Fd1Section = 'visa' | 'insurance'
 export function Fd1Panel({ fd1, section, hideTitle = false }: { fd1: Fd1State; section: Fd1Section; hideTitle?: boolean }) {
   const { lang, plan, guides, profile } = fd1
   const [editing, setEditing] = useState(false)
+  const [movedOn, setMovedOn] = useState<string | null>(null)
   const isVisa = section === 'visa'
 
   const tasks = (plan?.tasks ?? []).filter((task) => (isVisa ? task.type !== 'NHIS_PAY' : task.type === 'NHIS_PAY'))
@@ -21,9 +22,24 @@ export function Fd1Panel({ fd1, section, hideTitle = false }: { fd1: Fd1State; s
       <div className={styles.header}>
         {hideTitle ? <span /> : <h2>{isVisa ? <FileText size={22} /> : <ShieldCheck size={22} />}{t(isVisa ? 'visaStay' : 'insurance', lang)}</h2>}
         {profile && !editing && (
-          <button type="button" className={styles.ghostButton} onClick={() => setEditing(true)}>
-            <Pencil size={14} />{t('editInfo', lang)}
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {isVisa && (
+              <button
+                type="button"
+                className={styles.ghostButton}
+                onClick={() => {
+                  const date = fd1.today ?? todayInSeoul()
+                  fd1.markMoved(date)
+                  setMovedOn(date)
+                }}
+              >
+                <Home size={14} />{t('moved', lang)}
+              </button>
+            )}
+            <button type="button" className={styles.ghostButton} onClick={() => setEditing(true)}>
+              <Pencil size={14} />{t('editInfo', lang)}
+            </button>
+          </div>
         )}
       </div>
 
@@ -43,6 +59,13 @@ export function Fd1Panel({ fd1, section, hideTitle = false }: { fd1: Fd1State; s
         </p>
       )}
 
+      {fd1.demoToday && (
+        <p className={styles.note}>
+          {t('demoDate', lang, { date: fd1.demoToday })}{' '}
+          <button type="button" className={styles.linkButton} onClick={fd1.clearDemoToday}>{t('backToToday', lang)}</button>
+        </p>
+      )}
+      {movedOn && isVisa && <p className={styles.note}>{t('movedDone', lang, { date: movedOn })}</p>}
       {fd1.planError && <p className={styles.warn}>{t('loadError', lang)}</p>}
       {!plan && !fd1.planError && <p className={styles.note}>{t('loading', lang)}</p>}
       {plan && !plan.rulesVerified && <p className={styles.note}>{t('rulesUnverified', lang)}</p>}
@@ -84,6 +107,12 @@ function ProfileSummary({ lang, profile }: { lang: Fd1Lang; profile: Fd1Profile 
 
 function TaskCard({ task, lang, fd1 }: { task: Fd1Task; lang: Fd1Lang; fd1: Fd1State }) {
   const guide = fd1.guides?.guides[task.type]
+  const [completing, setCompleting] = useState(false)
+  const needsDates = task.type === 'ARC_REGISTER' || task.type === 'ARC_EXTEND'
+  const onDone = () => {
+    if (needsDates) setCompleting(true)
+    else fd1.completeTask(task.type)
+  }
   const meta = task.status === 'OVERDUE'
     ? `${t('overdue', lang)} · ${task.dueDate}`
     : task.status === 'UPCOMING' && task.openDate
@@ -108,8 +137,22 @@ function TaskCard({ task, lang, fd1 }: { task: Fd1Task; lang: Fd1Lang; fd1: Fd1S
                 {link.label}<ExternalLink size={12} />
               </a>
             ))}
+            {!completing && (
+              <button type="button" className={styles.doneButton} onClick={onDone}>
+                <CheckCircle2 size={14} />{task.type === 'NHIS_PAY' ? t('markPaid', lang) : t('done', lang)}
+              </button>
+            )}
           </div>
         </>
+      )}
+      {completing && (
+        <CompleteForm
+          task={task}
+          lang={lang}
+          today={fd1.today ?? todayInSeoul()}
+          onCancel={() => setCompleting(false)}
+          onSave={(input) => { fd1.completeTask(task.type, input); setCompleting(false) }}
+        />
       )}
     </article>
   )
@@ -205,6 +248,47 @@ function ProfileForm({ lang, initial, onSave, onCancel }: {
           </label>
         </>
       )}
+      <div className={styles.formActions}>
+        <button type="submit" className={styles.primaryButton}>{t('save', lang)}</button>
+        <button type="button" className={styles.ghostButton} onClick={onCancel}>{t('cancel', lang)}</button>
+        {error && <span className={styles.formError}>{error}</span>}
+      </div>
+    </form>
+  )
+}
+
+/** 완료 → 다음 주기를 만들 날짜 입력 (외국인등록: 등록일·만료일 / 연장: 새 만료일) */
+function CompleteForm({ task, lang, today, onSave, onCancel }: {
+  task: Fd1Task
+  lang: Fd1Lang
+  today: string
+  onSave: (input: { arcIssuedDate?: string; stayExpiryDate?: string }) => void
+  onCancel: () => void
+}) {
+  const isRegister = task.type === 'ARC_REGISTER'
+  const [arcIssuedDate, setArcIssuedDate] = useState(today)
+  const [stayExpiryDate, setStayExpiryDate] = useState('')
+  const [error, setError] = useState('')
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault()
+    if (!stayExpiryDate) return setError(t(isRegister ? 'stayExpiryDate' : 'newExpiry', lang))
+    if (!isRegister && stayExpiryDate <= task.dueDate) return setError(`${t('newExpiry', lang)} > ${task.dueDate}`)
+    if (isRegister && stayExpiryDate <= arcIssuedDate) return setError(`${t('stayExpiryDate', lang)} > ${t('arcIssuedDate', lang)}`)
+    onSave(isRegister ? { arcIssuedDate, stayExpiryDate } : { stayExpiryDate })
+  }
+
+  return (
+    <form className={styles.form} style={{ margin: '12px 0 0' }} onSubmit={submit}>
+      <p className={styles.taskSummary} style={{ gridColumn: '1 / -1', margin: 0 }}>{t(isRegister ? 'doneArcHint' : 'doneExtendHint', lang)}</p>
+      {isRegister && (
+        <label className={styles.field}>{t('arcIssuedDate', lang)}
+          <input type="date" required value={arcIssuedDate} onChange={(e) => setArcIssuedDate(e.target.value)} />
+        </label>
+      )}
+      <label className={styles.field}>{t(isRegister ? 'stayExpiryDate' : 'newExpiry', lang)}
+        <input type="date" required value={stayExpiryDate} onChange={(e) => setStayExpiryDate(e.target.value)} />
+      </label>
       <div className={styles.formActions}>
         <button type="submit" className={styles.primaryButton}>{t('save', lang)}</button>
         <button type="button" className={styles.ghostButton} onClick={onCancel}>{t('cancel', lang)}</button>

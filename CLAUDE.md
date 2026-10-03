@@ -20,6 +20,7 @@ galaba/
 | `npm run dev:frontend` / `npm run dev:backend` | 한쪽만 실행 |
 | `npm run check` | 백엔드 타입체크+테스트, 프론트 타입체크 (push 전 필수) |
 | `npm --prefix frontend run lint` | 프론트 ESLint |
+| `npm run e2e` | FD1 데모 흐름 E2E (Playwright, 서버가 없으면 띄운다. 처음 한 번 `npx --prefix frontend playwright install chromium`) |
 | `npm run build` | 백엔드 tsc + 프론트 next build |
 
 패키지 매니저는 **npm**만 쓴다(pnpm/yarn lock 파일을 만들지 않는다).
@@ -58,7 +59,7 @@ galaba/
 - v0에서 새 화면을 가져올 때: `v0-import` 스킬.
 - `next build`의 "multiple lockfiles / workspace root" 경고는 루트와 frontend에 lock 파일이 따로 있어서 생긴다. 빌드에는 영향이 없다.
 
-- FD1(체류·건강보험): `/visa`, `/insurance` 화면은 `components/fd1/`, 데이터·문구(ko/en/uz)는 `lib/fd1.ts`. 상단 언어 선택·알림 벨(`Fd1TopActions`)은 홈과 `AppShell`에 들어 있다. DB 연결 전까지 내 정보·납부 체크·읽은 알림은 localStorage(`fd1.*`)에 저장하고, 없으면 데모 사용자(`/api/fd1/demo-profile`)를 보여준다. 언어 선택은 아직 FD1 부분에만 적용된다.
+- FD1(체류·건강보험): `/visa`, `/insurance` 화면은 `components/fd1/`, 데이터·문구(ko/en/uz)는 `lib/fd1.ts`. 상단 언어 선택·알림 벨(`Fd1TopActions`)은 홈과 `AppShell`에 들어 있다. DB 연결 전까지 내 정보·납부 체크·읽은 알림은 localStorage(`fd1.*`)에 저장하고, 없으면 데모 사용자(`/api/fd1/demo-profile`)를 보여준다. 언어 선택은 아직 FD1 부분에만 적용된다. 데모 발표 때는 `?today=2026-10-16`처럼 날짜를 고정할 수 있다(`?today=`로 해제, 화면에 배너 표시).
 
 ## 백엔드 메모
 - FD1(체류·건강보험 일정, `docs/PRD-FD1.md`): 계산은 `src/fd1/plan.ts`(순수 함수), 규정 숫자는 `src/fd1/config.ts`에서만 바꾼다. 날짜는 한국 시간 기준 `"YYYY-MM-DD"` 문자열. 화면 문구는 서버가 보내지 않고, 안내·체크리스트 다국어 문구는 `src/fd1/guides.ts`에 있다.
