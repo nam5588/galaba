@@ -1,8 +1,5 @@
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const FILE = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "data", "demo-user.json");
+// 정적 import: 배포(Vercel) 번들에 데모 사용자 파일이 반드시 포함되게 한다. 로컬 dev는 tsx watch가 바뀌면 재시작한다.
+import DEMO_USER from "../../data/demo-user.json" with { type: "json" };
 
 export interface DemoUser {
   name: string;
@@ -11,9 +8,8 @@ export interface DemoUser {
   [key: string]: unknown;
 }
 
-/** 요청마다 파일을 읽으므로 FD1이 값을 바꾸면 서버 재시작 없이 반영된다. */
 export function loadDemoUser(): DemoUser {
-  const { _note, ...user } = JSON.parse(readFileSync(FILE, "utf8")) as DemoUser & { _note?: string };
+  const { _note, ...user } = DEMO_USER as DemoUser & { _note?: string };
   return user;
 }
 

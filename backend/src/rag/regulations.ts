@@ -1,9 +1,11 @@
 // 학칙 RAG (PRD 6장): 규정 텍스트를 조(條) 단위로 자르고(긴 조는 항 단위로 다시 자름) BM25로 검색한다.
 // 임베딩 API 없이 동작하도록 한국어는 글자 2-gram으로 토큰화한다.
 // 원본: backend/data/regulations/*.txt (파일명 = 문서명) → `npm run build:rag` → backend/data/regulations.json
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+// 정적 import: 배포(Vercel) 번들에 학칙 색인이 반드시 포함되게 한다
+import INDEX from "../../data/regulations.json" with { type: "json" };
 
 export interface RegulationChunk {
   id: string;
@@ -119,9 +121,7 @@ const df = new Map<string, number>();
 let avgLen = 1;
 
 function build(): void {
-  const chunks: RegulationChunk[] = existsSync(INDEX_FILE)
-    ? (JSON.parse(readFileSync(INDEX_FILE, "utf8")) as RegulationChunk[])
-    : chunkSources();
+  const chunks = INDEX as RegulationChunk[];
   index = chunks.map((chunk) => {
     const heading = `${chunk.article} ${chunk.title}`;
     const tokens = tokenize(`${heading} ${heading} ${heading} ${chunk.text}`); // 조 제목 3배 가중치
@@ -132,7 +132,7 @@ function build(): void {
   df.clear();
   for (const { tf } of index) for (const t of tf.keys()) df.set(t, (df.get(t) ?? 0) + 1);
   avgLen = index.reduce((s, d) => s + d.len, 0) / Math.max(index.length, 1);
-  console.log(`[rag] 규정 청크 ${index.length}개 색인 (${existsSync(INDEX_FILE) ? "regulations.json" : "txt 원본"})`);
+  console.log(`[rag] 규정 청크 ${index.length}개 색인 (regulations.json)`);
 }
 
 /** 상위 k개 조항. 같은 조의 여러 항이 걸리면 점수가 가장 높은 항 하나만 남긴다. */
