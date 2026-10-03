@@ -65,7 +65,7 @@ export function IntroSplash({ onDone }: { onDone?: () => void }) {
       {/* 2번 화면: 도장이 쾅 찍힘 */}
       <div className={styles.target} aria-hidden="true">
         <span className={styles.ripple} />
-        <Image className={styles.seal} src="/images/intro-stamp.png" alt="" width={640} height={640} loading="eager" />
+        <Image className={styles.seal} src="/images/intro-stamp.png" alt="" width={640} height={640} loading="eager" unoptimized />
       </div>
     </div>
   )
