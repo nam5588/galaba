@@ -114,50 +114,6 @@ export const getTimetableExample: ToolDef<{ date?: string }, ClassItem[]> = {
   },
 };
 
-// ---------- FD3: search_jobs ----------
-export interface Job {
-  title: string;
-  employer: string;
-  wage: string;
-  hoursPerWeek: number;
-  location: string;
-  weekend: boolean;
-  allowedForD2: boolean;
-  note?: string;
-  url: string;
-}
-
-const JOBS: Job[] = [
-  { title: "편의점 주말 오후 근무", employer: "CU 국민대점", wage: "시급 10,320원", hoursPerWeek: 12, location: "서울 성북구 정릉동", weekend: true, allowedForD2: true, url: "" },
-  { title: "편의점 평일 오전 근무", employer: "GS25 길음역점", wage: "시급 10,320원", hoursPerWeek: 15, location: "서울 성북구 길음동", weekend: false, allowedForD2: true, url: "" },
-  { title: "국제교류팀 행정 보조 (교내 근로)", employer: "국민대학교", wage: "시급 11,000원", hoursPerWeek: 10, location: "국민대학교 본부관", weekend: false, allowedForD2: true, url: "https://www.kookmin.ac.kr" },
-  { title: "건설현장 보조 (주말)", employer: "OO건설", wage: "일급 150,000원", hoursPerWeek: 16, location: "서울 강북구", weekend: true, allowedForD2: false, note: "건설업은 유학생 시간제 취업이 제한되는 업종", url: "" },
-];
-
-export const searchJobsExample: ToolDef<{ query?: string; area?: string; weekend?: boolean }, Job[]> = {
-  name: "search_jobs",
-  description:
-    "유학생(D-2)이 지원할 수 있는 아르바이트 공고를 찾는다. 각 공고에 시급, 주당 시간, D-2 가능 여부(allowedForD2)가 있다. 검색어는 한국어로 보낸다(예: '편의점').",
-  inputSchema: {
-    type: "object",
-    properties: {
-      query: { type: "string", description: "업종·키워드(한국어)" },
-      area: { type: "string", description: "지역(예: 성북구)" },
-      weekend: { type: "boolean", description: "주말 근무만" },
-    },
-    additionalProperties: false,
-  },
-  label: (input) => `알바 검색${input.query ? `: ${input.query}` : ""}${input.weekend ? " (주말)" : ""}`,
-  async run({ query, area, weekend }) {
-    return JOBS.filter(
-      (j) =>
-        (!query || `${j.title} ${j.employer}`.includes(query)) &&
-        (!area || j.location.includes(area)) &&
-        (weekend === undefined || j.weekend === weekend),
-    );
-  },
-};
-
 // ---------- FD2: get_notices (실제 공지 API 함수) ----------
 export const getNoticesTool: ToolDef<{ category?: string; query?: string; limit?: number }> = {
   name: "get_notices",
