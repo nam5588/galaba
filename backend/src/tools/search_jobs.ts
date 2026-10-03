@@ -38,7 +38,7 @@ function toResult(job: Job): JobResult {
   const shifts = job.shifts ?? [];
   return {
     id: job.id,
-    title: job.title,
+    title: `[예시] ${job.title}`, // JOB PRD: 데모용 가상 공고임을 답과 출처에 드러낸다
     employer: workplace.name,
     category: job.category,
     wage: `시급 ${job.hourlyWage.toLocaleString("ko-KR")}원`,
@@ -62,7 +62,7 @@ export const searchJobsTool: ToolDef<{ query?: string; category?: string; weeken
   name: "search_jobs",
   description:
     "유학생 알바 공고(데모용 가상 데이터)를 찾는다. 데모 학생(D-2, TOPIK 4, 월·수·금 18~22시 가능) 기준 매칭 순서로 돌려주며, 공고마다 시급, 근무 요일·시간, 요구 TOPIK, 조건 일치 여부와 사유, 후기 평점이 있다. " +
-    "취업 가능 여부를 단정하지 말고 workPermitNote를 함께 안내한다. 검색어·업종은 한국어로(업종: 카페·편의점·음식점).",
+    "답할 때 반드시 '예시(데모) 공고'라고 밝히고, 취업 가능 여부를 단정하지 말고 workPermitNote를 함께 안내한다. 검색어·업종은 한국어로(업종: 카페·편의점·음식점).",
   inputSchema: {
     type: "object",
     properties: {
