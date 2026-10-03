@@ -14,7 +14,7 @@ import type { SourceKind } from '@/lib/chat'
 
 /** 오케스트레이터 도구 이름 -> 화면에 보이는 칩 (PRD 4장 "사용한 도구 표시") */
 export const TOOL_META: Record<string, { label: string; icon: LucideIcon }> = {
-  search_regulations: { label: '학칙 검색', icon: BookOpen },
+  search_regulations: { label: '규정 검색', icon: BookOpen },
   get_deadlines: { label: '기한 확인', icon: CalendarClock },
   get_notices: { label: '공지 확인', icon: Bell },
   get_timetable: { label: '시간표 확인', icon: CalendarDays },

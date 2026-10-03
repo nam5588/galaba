@@ -61,7 +61,8 @@ const RULES = `너는 Dojang이야. 국민대학교 외국인 유학생의 학�
 - 질문한 언어로 답한다(영어 질문 → 영어 답). 도구에 보내는 검색어는 한국어로 바꿔 보낸다.
 - 도구 결과와 학칙 조항에 없는 사실은 말하지 않는다. 특히 비자·보험·알바 규정은 추측하지 않는다.
 - 근거를 못 찾으면 "확인하지 못했어요"라고 말하고 문의처를 안내한다: 학사·학칙은 학사지원팀, 비자·체류는 국제교류팀 또는 외국인종합안내센터(1345).
-- 학칙을 근거로 쓰면 "학칙 제N조"를 인용한다. 비자·보험 답에는 출처를 붙인다.
+- 학칙을 근거로 쓰면 "학칙 제N조"를 인용한다. 법령은 "출입국관리법 제N조"처럼 법 이름과 조를 쓰고, 하이코리아 매뉴얼은 "하이코리아 체류민원 매뉴얼에 따르면"처럼 밝힌다. 비자·보험 답에는 출처를 붙인다.
+- 알바 질문은 search_regulations로 시간제취업 허용 시간·제한 업종을 확인하고, 허가를 먼저 받아야 한다는 점을 꼭 말한다.
 - 여러 도구가 필요하면 한 번에 같이 부른다. 도구 호출은 모두 합쳐 최대 ${MAX_TOOL_CALLS}번이다.
 - "챙겨야 할 것/할 일" 질문에는 get_deadlines·get_timetable·get_notices를 한 번에 함께 불러 확인하고, 날짜순 목록으로 답한다: "- 10/7(수) 무엇 — 할 일". 공지 중 마감이 있는 것도 넣는다.
 - 답에 날짜가 분명한 중요한 마감(비자 만료, 납부 기한, 신청 마감)이 나오면 묻지 말고 create_calendar_event로 1~2개를 바로 만든다. 답 끝에 "캘린더 버튼을 만들어 뒀어요"라고 한 줄로 알린다.
@@ -125,8 +126,8 @@ function collect(name: string, output: unknown, state: RunState): void {
     if (name === "search_regulations") {
       const r = item as RegulationHit;
       const doc = r.doc === "국민대학교 학칙" ? "학칙" : r.doc;
-      const title = `${doc} ${r.article}(${r.title})`;
-      state.sources.set(title, { title, kind: "regulation", text: r.text.length > 300 ? `${r.text.slice(0, 300)}…` : r.text, tool: name });
+      const title = r.article ? `${doc} ${r.article}(${r.title})` : `${doc} · ${r.title}`; // 조 번호 없는 안내문은 항목 제목
+      state.sources.set(title, { title, ...(r.url && { url: r.url }), kind: "regulation", text: r.text.length > 300 ? `${r.text.slice(0, 300)}…` : r.text, tool: name });
     } else if (item && typeof item === "object" && typeof (item as { url?: unknown }).url === "string" && (item as { url: string }).url) {
       const { title, url } = item as { title?: string; url: string };
       const label = title ?? url;
@@ -146,6 +147,8 @@ function pickSources(answer: string, state: RunState): ChatSource[] {
         const num = s.title.match(/제(\d+)조/)?.[1];
         return !!num && new RegExp(`제\\s*${num}\\s*조`).test(answer);
       }));
+      // 조 번호가 없는 안내문(하이코리아 매뉴얼)은 인용 확인이 어려워 검색 상위 2개를 출처로 붙인다
+      picked.push(...group.filter((s) => !/제\d+조/.test(s.title)).slice(0, 2));
     } else if (group[0].kind === "notice") {
       picked.push(...group.filter((s) => {
         // 제목의 단어(괄호 머리말·숫자 제외) 중 3개 이상(짧은 제목은 전부)이 답에 나오면 언급된 것으로 본다

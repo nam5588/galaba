@@ -14,6 +14,7 @@ export interface RegulationChunk {
   article: string; // "제32조"
   title: string; // "학기당 이수학점"
   text: string;
+  url?: string; // 원문 출처 (txt 맨 위 "# 출처: <url>" 줄)
 }
 
 const DATA = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "data");
@@ -23,6 +24,8 @@ export const INDEX_FILE = join(DATA, "regulations.json");
 const ARTICLE = /^제(\d+)조(의\d+)?\s*\(([^)]+)\)\s*(.*)$/;
 const CHAPTER = /^제\d+장\s/;
 const SUPPLEMENT = /^부\s*칙/;
+const SECTION = /^■\s*(.+)$/; // 조 번호가 없는 안내문(하이코리아 매뉴얼 정리본)의 항목 제목
+const SOURCE = /^#\s*출처:\s*(\S+)/; // "#"로 시작하는 줄은 설명이라 색인하지 않는다
 const LONG = 900; // 이보다 긴 조는 항(①②…) 단위로 나눈다
 const MIN_SCORE = 8; // 이보다 낮으면 관련 없는 조항으로 본다 (관련 질문 10점 이상, 엉뚱한 질문 3~5점)
 
@@ -37,17 +40,26 @@ function clean(text: string): string {
 function chunkDocument(doc: string, raw: string): RegulationChunk[] {
   const articles: Omit<RegulationChunk, "id">[] = [];
   let chapter = "";
+  let url: string | undefined;
   let current: Omit<RegulationChunk, "id"> | null = null;
   for (const line of raw.split("\n").map((l) => l.trim())) {
     if (!line) continue;
+    if (line.startsWith("#")) {
+      url = SOURCE.exec(line)?.[1] ?? url;
+      continue;
+    }
     if (SUPPLEMENT.test(line)) break; // 부칙(개정 이력)은 검색 잡음이라 제외
     if (CHAPTER.test(line)) {
       chapter = line.replace(/<[^>]*>/g, "").trim();
       continue;
     }
     const m = ARTICLE.exec(line);
+    const s = SECTION.exec(line);
     if (m) {
-      current = { doc, chapter, article: `제${m[1]}조${m[2] ?? ""}`, title: m[3], text: m[4] };
+      current = { doc, chapter, article: `제${m[1]}조${m[2] ?? ""}`, title: m[3], text: m[4], ...(url && { url }) };
+      articles.push(current);
+    } else if (s) {
+      current = { doc, chapter: "", article: "", title: s[1].trim(), text: "", ...(url && { url }) };
       articles.push(current);
     } else if (current) {
       current.text += ` ${line}`;
@@ -56,7 +68,7 @@ function chunkDocument(doc: string, raw: string): RegulationChunk[] {
   const chunks: RegulationChunk[] = [];
   for (const a of articles) {
     const text = clean(a.text);
-    const key = `${doc}#${a.article}`;
+    const key = `${doc}#${a.article || a.title}`;
     const paragraphs = text.split("\n").filter(Boolean);
     if (text.length <= LONG || paragraphs.length < 2) {
       chunks.push({ ...a, id: key, text });
@@ -102,6 +114,14 @@ const SYNONYMS: [RegExp, string][] = [
   [/외국인|유학생/, "외국인학생 위탁생"],
   [/전과|과\s*바꾸|전공\s*바꾸/, "전과 전부 전공 변경"],
   [/조기\s*졸업|빨리\s*졸업/, "조기졸업 수업연한"],
+  // 체류·알바·보험 (출입국관리법, 하이코리아 매뉴얼, 국민건강보험법)
+  [/알바|아르바이트|일\s*해도|일하|근무|취업|편의점|카페|배달|part.?time|work/i, "시간제취업 허용 시간 제한 업종"],
+  [/몇\s*시간|시간\s*제한|주말|방학/, "시간제취업 허용 시간"],
+  [/비자\s*연장|체류\s*연장|체류기간|비자.*만료|extend|extension/i, "체류기간 연장허가"],
+  [/외국인\s*등록|등록증|arc\b|residence card/i, "외국인등록 입국한 날부터 90일 이내 체류지 관할 출입국 외국인등록 제출서류"],
+  [/이사|주소|전입|moving/i, "체류지 변경의 신고"],
+  [/보험|insurance/i, "건강보험 외국인 보험료 체납 지역가입자"],
+  [/불법|걸리|적발|벌금|penalt/i, "시간제취업 위반 시 처리 불법취업"],
 ];
 
 function expandQuery(q: string): string {
@@ -163,7 +183,7 @@ export function searchRegulationsScored(query: string, k = 5): { chunk: Regulati
   const seen = new Set<string>();
   const out: { chunk: RegulationChunk; score: number }[] = [];
   for (const hit of scored) {
-    const key = `${hit.chunk.doc}#${hit.chunk.article}`;
+    const key = `${hit.chunk.doc}#${hit.chunk.article || hit.chunk.title}`;
     if (seen.has(key)) continue;
     seen.add(key);
     out.push(hit);
