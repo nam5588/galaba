@@ -42,6 +42,7 @@ galaba/
 | 메서드 | 경로 | 응답 | 상태 |
 |---|---|---|---|
 | GET | `/api/health` | `{ status: "ok", timestamp }` | 구현됨 |
+| GET | `/api/notices?category=&limit=` | `{ source, fetchedAt, items: Notice[] }` (Notice: id, category, tag, tone, title, date, text, url, dept, pinned) | 구현됨 |
 
 ## 프론트엔드 메모
 - `frontend/AGENTS.md`: Next 16은 학습 데이터와 다를 수 있으니, Next API를 새로 쓸 때는 `frontend/node_modules/next/dist/docs/`를 먼저 확인한다.
