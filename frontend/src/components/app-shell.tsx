@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { FormEvent, ReactNode, useEffect, useState } from 'react'
 import { Fd1TopActions } from '@/components/fd1/Fd1Header'
 import { useFd1 } from '@/components/fd1/useFd1'
+import { SiteFooter } from '@/components/SiteFooter'
 import { useStored } from '@/lib/fd1'
 import { tr, useLang } from '@/lib/i18n'
 import { SHELL } from '@/lib/i18n/shell'
@@ -157,6 +158,7 @@ export function AppShell({ children, fixed = false, showSearch = true, onRecentC
           <div className="top-actions"><Fd1TopActions fd1={fd1} /><div className="profile"><div className="avatar">{L('profileInitial')}</div><div><strong>{L('profileName')}</strong><small>{L('profileSub')}</small></div><ChevronDown size={15} /></div></div>
         </header>
         {children}
+        {!fixed && <SiteFooter />}
       </div>
     </main>
   )
