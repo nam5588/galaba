@@ -2,67 +2,48 @@
 
 import { Suspense, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CalendarDays, ChevronRight } from 'lucide-react'
+import { ArrowDown, Sparkles } from 'lucide-react'
 import { AppShell } from '@/components/app-shell'
 import { ChatPanel, type ChatPanelHandle } from '@/components/chat/ChatPanel'
 import { useChat } from '@/components/chat/useChat'
-import { Fd1UpcomingRows } from '@/components/fd1/Fd1Upcoming'
 import { useFd1 } from '@/components/fd1/useFd1'
-import { WeekSchedule } from '@/components/home/WeekSchedule'
-import { AcademicsSummary } from '@/components/home/AcademicsSummary'
+import { HomeOverview } from '@/components/home/HomeOverview'
 import { IntroSplash } from '@/components/intro/IntroSplash'
-import { routeOfTask } from '@/lib/fd1'
-import { tr, useLang } from '@/lib/i18n'
-import { CHAT_T } from '@/lib/i18n/chat'
 
-// 메인 = 왼쪽 메뉴(공용 AppShell, 고정) + 가운데 AI 채팅(이 영역만 스크롤) + 오른쪽 시간표·다가오는 일정(고정)
 export default function Page() {
   const chat = useChat()
   const fd1 = useFd1()
-  const router = useRouter()
   const panelRef = useRef<ChatPanelHandle>(null)
-  const lang = useLang()
+  const chatSectionRef = useRef<HTMLElement>(null)
 
-  const ask = (q: string) => void chat.ask(q)
+  const openChat = () => {
+    chatSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    window.setTimeout(() => panelRef.current?.focus(), 350)
+  }
+  const ask = (q: string) => {
+    openChat()
+    void chat.ask(q)
+  }
 
   return (
     <AppShell
-      fixed
-      showSearch={false}
       busy={chat.pending}
       onRecentChat={ask}
       onNewChat={() => {
         chat.reset()
-        panelRef.current?.focus()
+        openChat()
       }}
-      onAiNav={() => panelRef.current?.focus()}
+      onAiNav={openChat}
     >
-      {/* 첫 화면: 도장을 찍으면 메인으로. 끝나면 바로 질문할 수 있게 채팅 입력창에 커서 */}
-      <IntroSplash onDone={() => panelRef.current?.focus()} />
+      <IntroSplash />
       <Suspense fallback={null}>
         <AutoAsk onAsk={ask} />
       </Suspense>
-      <div className="dashboard-grid">
-        <section className="main-column">
-          <ChatPanel ref={panelRef} chat={chat} />
-        </section>
-        <aside className="right-column">
-          {/* 시간표: 요리(FD2) /api/schedule */}
-          <WeekSchedule />
-          {/* 학업 현황: 수강 & 학업 축약 카드 /api/academics */}
-          <AcademicsSummary />
-          {/* 다가오는 일정: 무하마드(FD1) 기한 계산. 채팅 get_deadlines와 같은 데모 사용자 */}
-          <section className="panel upcoming-panel">
-            <div className="section-heading">
-              <div className="heading-title"><CalendarDays size={21} strokeWidth={2.5} /><h2>{tr(CHAT_T, 'upcoming', lang)}</h2></div>
-              <button className="text-action" onClick={() => ask(tr(CHAT_T, 'qHero', lang))}>{tr(CHAT_T, 'aiSummary', lang)}<ChevronRight size={16} /></button>
-            </div>
-            <div className="upcoming-list">
-              <Fd1UpcomingRows fd1={fd1} onOpenTask={(type) => router.push(routeOfTask(type))} />
-            </div>
-          </section>
-        </aside>
-      </div>
+      <HomeOverview fd1={fd1} onAskChat={openChat} />
+      <section ref={chatSectionRef} id="ai-chat" className="home-chat-section">
+        <div className="home-chat-heading"><div><span><Sparkles size={18} /> DOJANG AI</span><h2>무엇이든 물어보세요</h2><p>비자, 학교생활, 수강신청까지. 필요한 답을 함께 찾아드릴게요.</p></div><ArrowDown size={21} /></div>
+        <div className="home-chat-panel"><ChatPanel ref={panelRef} chat={chat} autoFocus={false} /></div>
+      </section>
     </AppShell>
   )
 }

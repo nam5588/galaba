@@ -17,7 +17,7 @@ export interface ChatPanelHandle {
 }
 
 /** 메인 가운데(1번 영역) LLM 채팅창: 빈 화면 → 대화 스레드, 아래에 질문 입력. 이 영역만 스크롤된다. */
-export const ChatPanel = forwardRef<ChatPanelHandle, { chat: ChatController }>(function ChatPanel({ chat }, ref) {
+export const ChatPanel = forwardRef<ChatPanelHandle, { chat: ChatController; autoFocus?: boolean }>(function ChatPanel({ chat, autoFocus = true }, ref) {
   const { messages, pending, ask, retry, reset } = chat
   const lang = useLang()
   const t = (key: keyof typeof CHAT_T) => tr(CHAT_T, key, lang)
@@ -32,8 +32,8 @@ export const ChatPanel = forwardRef<ChatPanelHandle, { chat: ChatController }>(f
 
   // 메인에 들어오면 바로 질문할 수 있게 입력칸에 커서 (마우스 쓰는 PC에서만. 모바일은 키보드가 튀어나와서 제외)
   useEffect(() => {
-    if (window.matchMedia('(pointer: fine)').matches) inputRef.current?.focus()
-  }, [])
+    if (autoFocus && window.matchMedia('(pointer: fine)').matches) inputRef.current?.focus()
+  }, [autoFocus])
 
   const lastRole = messages.at(-1)?.role
   // 새 메시지가 생기면 스크롤: 기다리는 중엔 맨 아래, 답이 오면 "내 질문 + 답의 첫 부분"이 보이게

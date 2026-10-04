@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { FormEvent, ReactNode, useEffect, useState } from 'react'
 import { Fd1TopActions } from '@/components/fd1/Fd1Header'
 import { useFd1 } from '@/components/fd1/useFd1'
+import { useStored } from '@/lib/fd1'
 import { tr, useLang } from '@/lib/i18n'
 import { SHELL } from '@/lib/i18n/shell'
 import {
@@ -67,6 +68,7 @@ export function AppShell({ children, fixed = false, showSearch = true, onRecentC
   const pathname = usePathname()
   const router = useRouter()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useStored<boolean>('dojang.sidebarCollapsed')
   const [siteSearch, setSiteSearch] = useState('')
   const fd1 = useFd1()
   const lang = useLang()
@@ -76,6 +78,8 @@ export function AppShell({ children, fixed = false, showSearch = true, onRecentC
   useEffect(() => {
     document.documentElement.lang = lang
   }, [lang])
+
+  const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed)
 
   const submitSearch = (event: FormEvent) => {
     event.preventDefault()
@@ -90,13 +94,15 @@ export function AppShell({ children, fixed = false, showSearch = true, onRecentC
   }
 
   return (
-    <main className={fixed ? 'app-shell dash-fixed' : 'app-shell'}>
+    <main className={`${fixed ? 'app-shell dash-fixed' : 'app-shell'}${sidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
+      {mobileNavOpen && <button type="button" className="sidebar-backdrop" aria-label={L('menuClose')} onClick={() => setMobileNavOpen(false)} />}
       <aside className={mobileNavOpen ? 'sidebar mobile-open' : 'sidebar'}>
         <div className="brand-row">
           <Link className="brand-link" href="/" onClick={() => setMobileNavOpen(false)}>
             <img className="brand-logo" src="/images/dojang_newlogo.png" alt="DOJANG International Student Admin Assistant" />
           </Link>
           <button className="mobile-close" onClick={() => setMobileNavOpen(false)} aria-label={L('menuClose')}><X size={20} /></button>
+          <button className="sidebar-close" type="button" onClick={toggleSidebar} aria-label={L('menuClose')} title={L('menuClose')}><Menu size={19} /></button>
         </div>
         <nav className="main-nav" aria-label={L('navAria')}>
           {navItems.map(({ label, icon: Icon, href, ai }) => href ? (
@@ -141,6 +147,7 @@ export function AppShell({ children, fixed = false, showSearch = true, onRecentC
       <div className="content-area">
         <header className="topbar">
           <button className="mobile-menu" onClick={() => setMobileNavOpen(true)} aria-label={L('menuOpen')}><Menu size={24} /></button>
+          <button className="desktop-menu" type="button" onClick={toggleSidebar} aria-label={sidebarCollapsed ? L('menuOpen') : L('menuClose')} aria-expanded={!sidebarCollapsed} title={sidebarCollapsed ? L('menuOpen') : L('menuClose')}><Menu size={21} /></button>
           {showSearch && (
             <form className="search-box" onSubmit={submitSearch}>
               <Search size={20} />
